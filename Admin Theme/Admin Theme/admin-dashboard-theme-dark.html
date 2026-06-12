@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Theme Dashboard (Dark)</title>
+  <link rel="stylesheet" href="admin-dashboard-theme-dark.css">
+</head>
+<body>
+  <!-- Feather-style icons (inline SVG) -->
+  <svg xmlns="http://www.w3.org/2000/svg" width="0" height="0" style="position:absolute">
+    <symbol id="icon-home" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></symbol>
+    <symbol id="icon-users" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></symbol>
+    <symbol id="icon-user" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></symbol>
+    <symbol id="icon-file-text" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></symbol>
+    <symbol id="icon-dollar-sign" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></symbol>
+    <symbol id="icon-check-circle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></symbol>
+    <symbol id="icon-activity" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></symbol>
+    <symbol id="icon-database" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path></symbol>
+    <symbol id="icon-layers" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline></symbol>
+    <symbol id="icon-log-out" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></symbol>
+    <symbol id="icon-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></symbol>
+    <symbol id="icon-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></symbol>
+    <symbol id="icon-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></symbol>
+    <symbol id="icon-edit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></symbol>
+    <symbol id="icon-trash" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></symbol>
+    <symbol id="icon-eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></symbol>
+    <symbol id="icon-chevron-left" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></symbol>
+    <symbol id="icon-menu" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></symbol>
+    <symbol id="icon-chevron-right" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></symbol>
+    <symbol id="icon-alert-triangle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></symbol>
+    <symbol id="icon-info" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></symbol>
+    <symbol id="icon-alert-circle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></symbol>
+  </svg>
+  <div class="dashboard-wrap">
+    <div class="sidebar-overlay" id="sidebar-overlay" aria-hidden="true"></div>
+    <div class="main-with-sidebar" id="main-with-sidebar">
+      <!-- Sidebar -->
+      <aside class="sidebar" id="sidebar">
+        <div class="sidebar-brand">
+          <div class="sidebar-brand-inner">
+            <div class="sidebar-logo">AT</div>
+            <div class="sidebar-brand-text">
+              <p>Admin Theme</p>
+              <p>Admin</p>
+            </div>
+          </div>
+        </div>
+
+        <nav class="sidebar-nav">
+          <div class="nav-section">
+            <div class="nav-section-title">
+              <svg class="icon-svg" aria-hidden="true"><use href="#icon-home"></use></svg>
+              <span>Main</span>
+            </div>
+            <ul class="nav-list">
+              <li class="nav-item"><a href="#" class="nav-link active"><svg class="nav-icon-svg" aria-hidden="true"><use href="#icon-home"></use></svg><span>Dashboard</span></a></li>
+            </ul>
+          </div>
+
+          <div class="nav-section">
+            <div class="nav-section-title">
+              <svg class="icon-svg" aria-hidden="true"><use href="#icon-users"></use></svg>
+              <span>Users</span>
+            </div>
+            <ul class="nav-list">
+              <li class="nav-item"><a href="#" class="nav-link"><svg class="nav-icon-svg" aria-hidden="true"><use href="#icon-users"></use></svg><span>Users</span></a></li>
+              <li class="nav-item"><a href="#" class="nav-link"><svg class="nav-icon-svg" aria-hidden="true"><use href="#icon-user"></use></svg><span>Customers</span></a></li>
+            </ul>
+          </div>
+
+          <div class="nav-section">
+            <div class="nav-section-title">
+              <svg class="icon-svg" aria-hidden="true"><use href="#icon-layers"></use></svg>
+              <span>Catalog</span>
+            </div>
+            <ul class="nav-list">
+              <li class="nav-item"><a href="#" class="nav-link"><svg class="nav-icon-svg" aria-hidden="true"><use href="#icon-database"></use></svg><span>Products</span></a></li>
+              <li class="nav-item"><a href="#" class="nav-link"><svg class="nav-icon-svg" aria-hidden="true"><use href="#icon-layers"></use></svg><span>Categories</span></a></li>
+            </ul>
+          </div>
+
+          <div class="nav-section">
+            <div class="nav-section-title">
+              <svg class="icon-svg" aria-hidden="true"><use href="#icon-file-text"></use></svg>
+              <span>Sales</span>
+            </div>
+            <ul class="nav-list">
+              <li class="nav-item"><a href="#" class="nav-link"><svg class="nav-icon-svg" aria-hidden="true"><use href="#icon-file-text"></use></svg><span>Orders</span></a></li>
+              <li class="nav-item"><a href="#" class="nav-link"><svg class="nav-icon-svg" aria-hidden="true"><use href="#icon-dollar-sign"></use></svg><span>Invoices</span></a></li>
+            </ul>
+          </div>
+
+          <div class="nav-section">
+            <div class="nav-section-title">
+              <svg class="icon-svg" aria-hidden="true"><use href="#icon-activity"></use></svg>
+              <span>Settings</span>
+            </div>
+            <ul class="nav-list">
+              <li class="nav-item"><a href="#" class="nav-link"><svg class="nav-icon-svg" aria-hidden="true"><use href="#icon-check-circle"></use></svg><span>Settings</span></a></li>
+            </ul>
+          </div>
+        </nav>
+
+        <div class="sidebar-footer">
+          <button type="button" class="btn-logout"><svg class="btn-icon-svg" aria-hidden="true"><use href="#icon-log-out"></use></svg><span>Logout</span></button>
+        </div>
+      </aside>
+
+      <!-- Main content -->
+      <main class="main-content">
+        <!-- Page header -->
+        <div class="page-header">
+          <button type="button" class="sidebar-toggle sidebar-toggle-inline" id="sidebar-toggle-inline" aria-label="Toggle sidebar" aria-expanded="true">
+            <svg class="icon-svg" aria-hidden="true"><use href="#icon-menu"></use></svg>
+          </button>
+          <div class="page-header-title">
+            <h1>Students</h1>
+            <p>View and manage student records</p>
+          </div>
+          <div class="header-actions">
+            <a href="admin-dashboard-theme.html" class="btn-modal">Light Mode</a>
+            <button type="button" class="btn-modal" id="btn-open-modal" aria-controls="app-modal">Modal</button>
+            <button type="button" class="btn-add" id="btn-open-offcanvas" aria-controls="add-student-offcanvas">
+              <svg class="btn-icon-svg" aria-hidden="true"><use href="#icon-plus"></use></svg>
+              <span>Add</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Alerts -->
+        <div class="alerts-stack">
+          <div class="alert alert-success" role="alert">
+            <svg class="alert-icon" aria-hidden="true"><use href="#icon-check-circle"></use></svg>
+            <p class="alert-message">Your changes have been saved successfully.</p>
+            <button type="button" class="alert-dismiss" aria-label="Dismiss"><svg class="icon-svg" aria-hidden="true"><use href="#icon-x"></use></svg></button>
+          </div>
+          <div class="alert alert-warning" role="alert">
+            <svg class="alert-icon" aria-hidden="true"><use href="#icon-alert-triangle"></use></svg>
+            <p class="alert-message">Your session will expire in 5 minutes. Please save your work.</p>
+            <button type="button" class="alert-dismiss" aria-label="Dismiss"><svg class="icon-svg" aria-hidden="true"><use href="#icon-x"></use></svg></button>
+          </div>
+          <div class="alert alert-error" role="alert">
+            <svg class="alert-icon" aria-hidden="true"><use href="#icon-alert-circle"></use></svg>
+            <p class="alert-message">Something went wrong. Please try again or contact support.</p>
+            <button type="button" class="alert-dismiss" aria-label="Dismiss"><svg class="icon-svg" aria-hidden="true"><use href="#icon-x"></use></svg></button>
+          </div>
+          <div class="alert alert-info" role="alert">
+            <svg class="alert-icon" aria-hidden="true"><use href="#icon-info"></use></svg>
+            <p class="alert-message">New features are available. Check the release notes for details.</p>
+            <button type="button" class="alert-dismiss" aria-label="Dismiss"><svg class="icon-svg" aria-hidden="true"><use href="#icon-x"></use></svg></button>
+          </div>
+        </div>
+
+        <!-- Stat cards -->
+        <div class="stat-cards">
+          <div class="stat-card">
+            <div class="stat-card-icon stat-card-icon-blue">
+              <svg class="icon-svg" aria-hidden="true"><use href="#icon-users"></use></svg>
+            </div>
+            <div class="stat-card-content">
+              <p class="stat-label">Total Users</p>
+              <p class="stat-value">2,847</p>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-icon stat-card-icon-green">
+              <svg class="icon-svg" aria-hidden="true"><use href="#icon-file-text"></use></svg>
+            </div>
+            <div class="stat-card-content">
+              <p class="stat-label">Orders</p>
+              <p class="stat-value">156</p>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-icon stat-card-icon-amber">
+              <svg class="icon-svg" aria-hidden="true"><use href="#icon-dollar-sign"></use></svg>
+            </div>
+            <div class="stat-card-content">
+              <p class="stat-label">Revenue</p>
+              <p class="stat-value">₹1.2L</p>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-icon stat-card-icon-purple">
+              <svg class="icon-svg" aria-hidden="true"><use href="#icon-activity"></use></svg>
+            </div>
+            <div class="stat-card-content">
+              <p class="stat-label">Active</p>
+              <p class="stat-value">89%</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="filters-bar">
+          <div class="search-wrap">
+            <svg class="search-icon" aria-hidden="true"><use href="#icon-search"></use></svg>
+            <input type="text" class="search-input" placeholder="Search by name...">
+          </div>
+          <div class="filter-group">
+            <label class="filter-label" for="filter-status">Status</label>
+            <select id="filter-status" class="filter-select">
+              <option value="">All</option>
+              <option value="applied">Applied</option>
+              <option value="enrolled">Enrolled</option>
+              <option value="new">New</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label class="filter-label" for="filter-category">Category</label>
+            <select id="filter-category" class="filter-select">
+              <option value="">All</option>
+              <option value="a">Category A</option>
+              <option value="b">Category B</option>
+              <option value="c">Category C</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label class="filter-label" for="filter-sort">Sort by</label>
+            <select id="filter-sort" class="filter-select">
+              <option value="name">Name</option>
+              <option value="date">Date</option>
+              <option value="status">Status</option>
+            </select>
+          </div>
+          <button type="button" class="btn-search" id="btn-search">
+            <svg class="btn-icon-svg" aria-hidden="true"><use href="#icon-search"></use></svg>
+            <span>Search</span>
+          </button>
+          <button type="button" class="btn-clear-filters" id="btn-clear-filters" hidden>
+            <svg class="btn-icon-svg" aria-hidden="true"><use href="#icon-x"></use></svg>
+            <span>Clear</span>
+          </button>
+        </div>
+
+        <!-- Content card with table -->
+        <div class="content-card space-y">
+          <div class="content-card-header">
+            <p class="content-card-title">Student List</p>
+          </div>
+
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Associate</th>
+                <th>Status</th>
+                <th>Email</th>
+                <th class="th-actions">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Rahul Sharma</td>
+                <td>ABC Academy</td>
+                <td><span class="badge badge-yellow">Applied</span></td>
+                <td>rahul@example.com</td>
+                <td>
+                  <div class="table-actions">
+                    <button type="button" class="btn-action btn-action-view" title="View"><svg class="btn-icon-svg" aria-hidden="true"><use href="#icon-eye"></use></svg></button>
+                    <button type="button" class="btn-action btn-action-edit" title="Edit"><svg class="btn-icon-svg" aria-hidden="true"><use href="#icon-edit"></use></svg></button>
+                    <button type="button" class="btn-action btn-action-delete" title="Delete"><svg class="btn-icon-svg" aria-hidden="true"><use href="#icon-trash"></use></svg></button>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td>Priya Patel</td>
+                <td>XYZ Institute</td>
+                <td><span class="badge badge-green">Enrolled</span></td>
+                <td>priya@example.com</td>
+                <td>
+                  <div class="table-actions">
+                    <button type="button" class="btn-action btn-action-view" title="View"><svg class="btn-icon-svg" aria-hidden="true"><use href="#icon-eye"></use></svg></button>
+                    <button type="button" class="btn-action btn-action-edit" title="Edit"><svg class="btn-icon-svg" aria-hidden="true"><use href="#icon-edit"></use></svg></button>
+                    <button type="button" class="btn-action btn-action-delete" title="Delete"><svg class="btn-icon-svg" aria-hidden="true"><use href="#icon-trash"></use></svg></button>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td>Amit Kumar</td>
+                <td>Direct</td>
+                <td><span class="badge badge-gray">New</span></td>
+                <td>amit@example.com</td>
+                <td>
+                  <div class="table-actions">
+                    <button type="button" class="btn-action btn-action-view" title="View"><svg class="btn-icon-svg" aria-hidden="true"><use href="#icon-eye"></use></svg></button>
+                    <button type="button" class="btn-action btn-action-edit" title="Edit"><svg class="btn-icon-svg" aria-hidden="true"><use href="#icon-edit"></use></svg></button>
+                    <button type="button" class="btn-action btn-action-delete" title="Delete"><svg class="btn-icon-svg" aria-hidden="true"><use href="#icon-trash"></use></svg></button>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td>Sneha Reddy</td>
+                <td>ABC Academy</td>
+                <td><span class="badge badge-yellow">Applied</span></td>
+                <td>sneha@example.com</td>
+                <td>
+                  <div class="table-actions">
+                    <button type="button" class="btn-action btn-action-view" title="View"><svg class="btn-icon-svg" aria-hidden="true"><use href="#icon-eye"></use></svg></button>
+                    <button type="button" class="btn-action btn-action-edit" title="Edit"><svg class="btn-icon-svg" aria-hidden="true"><use href="#icon-edit"></use></svg></button>
+                    <button type="button" class="btn-action btn-action-delete" title="Delete"><svg class="btn-icon-svg" aria-hidden="true"><use href="#icon-trash"></use></svg></button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div class="table-pagination">
+            <p class="pagination-info">Showing <strong>1</strong> to <strong>4</strong> of <strong>4</strong> results</p>
+            <div class="pagination-controls">
+              <button type="button" class="btn-pagination" disabled aria-label="Previous">
+                <svg class="btn-icon-svg" aria-hidden="true"><use href="#icon-chevron-left"></use></svg>
+              </button>
+              <div class="pagination-pages">
+                <button type="button" class="btn-page active" aria-current="page">1</button>
+              </div>
+              <button type="button" class="btn-pagination" disabled aria-label="Next">
+                <svg class="btn-icon-svg" aria-hidden="true"><use href="#icon-chevron-right"></use></svg>
+              </button>
+            </div>
+            <div class="pagination-per-page">
+              <label class="filter-label" for="per-page">Per page</label>
+              <select id="per-page" class="filter-select pagination-select">
+                <option value="10" selected>10</option>
+                <option value="25">25</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Empty state -->
+        <div class="content-card">
+          <div class="content-card-header">
+            <p class="content-card-title">Empty State</p>
+          </div>
+          <div class="empty-state">
+            <div class="empty-state-icon">
+              <svg class="icon-svg" aria-hidden="true"><use href="#icon-database"></use></svg>
+            </div>
+            <h3 class="empty-state-title">No data found</h3>
+            <p class="empty-state-description">There are no records to display. Try adjusting your filters or add new data.</p>
+            <button type="button" class="btn-add">Add new record</button>
+          </div>
+        </div>
+
+        <!-- Loading states -->
+        <div class="content-card">
+          <div class="content-card-header">
+            <p class="content-card-title">Loading States</p>
+          </div>
+          <div class="loading-demo">
+            <div class="skeleton-cards">
+              <div class="skeleton-card"><div class="skeleton skeleton-text" style="width:60%"></div><div class="skeleton skeleton-text" style="width:40%"></div></div>
+              <div class="skeleton-card"><div class="skeleton skeleton-text" style="width:60%"></div><div class="skeleton skeleton-text" style="width:40%"></div></div>
+              <div class="skeleton-card"><div class="skeleton skeleton-text" style="width:60%"></div><div class="skeleton skeleton-text" style="width:40%"></div></div>
+            </div>
+            <div class="skeleton-table">
+              <div class="skeleton-table-row"><div class="skeleton" style="width:25%"></div><div class="skeleton" style="width:20%"></div><div class="skeleton" style="width:15%"></div><div class="skeleton" style="width:30%"></div></div>
+              <div class="skeleton-table-row"><div class="skeleton" style="width:25%"></div><div class="skeleton" style="width:20%"></div><div class="skeleton" style="width:15%"></div><div class="skeleton" style="width:30%"></div></div>
+              <div class="skeleton-table-row"><div class="skeleton" style="width:25%"></div><div class="skeleton" style="width:20%"></div><div class="skeleton" style="width:15%"></div><div class="skeleton" style="width:30%"></div></div>
+              <div class="skeleton-table-row"><div class="skeleton" style="width:25%"></div><div class="skeleton" style="width:20%"></div><div class="skeleton" style="width:15%"></div><div class="skeleton" style="width:30%"></div></div>
+              <div class="skeleton-table-row"><div class="skeleton" style="width:25%"></div><div class="skeleton" style="width:20%"></div><div class="skeleton" style="width:15%"></div><div class="skeleton" style="width:30%"></div></div>
+            </div>
+            <div class="spinner-demo">
+              <p class="spinner-label">Spinner</p>
+              <div class="spinner"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Charts -->
+        <div class="charts-section">
+          <div class="chart-card">
+            <p class="chart-title">Revenue (30D)</p>
+            <div class="chart-placeholder chart-line">
+              <svg class="chart-svg" viewBox="0 0 200 80" preserveAspectRatio="none">
+                <polyline fill="none" stroke="currentColor" stroke-width="1.5" points="0,60 30,50 60,55 90,30 120,35 150,25 180,20 200,15"/>
+              </svg>
+            </div>
+          </div>
+          <div class="chart-card">
+            <p class="chart-title">Orders by Category</p>
+            <div class="chart-placeholder chart-bar">
+              <div class="bar" style="height:40%"></div>
+              <div class="bar" style="height:70%"></div>
+              <div class="bar" style="height:50%"></div>
+              <div class="bar" style="height:90%"></div>
+              <div class="bar" style="height:60%"></div>
+            </div>
+          </div>
+          <div class="chart-card">
+            <p class="chart-title">Distribution</p>
+            <div class="chart-placeholder chart-pie">
+              <div class="pie-chart"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="content-card">
+          <div class="content-card-header">
+            <p class="content-card-title">Tabs</p>
+          </div>
+          <div class="tabs">
+            <div class="tabs-list" role="tablist">
+              <button type="button" class="tab-btn active" role="tab" aria-selected="true" data-tab="overview">Overview</button>
+              <button type="button" class="tab-btn" role="tab" aria-selected="false" data-tab="details">Details</button>
+              <button type="button" class="tab-btn" role="tab" aria-selected="false" data-tab="history">History</button>
+            </div>
+            <div class="tab-panels">
+              <div class="tab-panel active" id="tab-overview" role="tabpanel">
+                <p>Overview content goes here. Summary and key metrics for quick reference.</p>
+              </div>
+              <div class="tab-panel" id="tab-details" role="tabpanel" hidden>
+                <p>Details content goes here. In-depth information and full breakdown.</p>
+              </div>
+              <div class="tab-panel" id="tab-history" role="tabpanel" hidden>
+                <p>History content goes here. Audit log and change history.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Progress bars -->
+        <div class="content-card">
+          <div class="content-card-header">
+            <p class="content-card-title">Progress Bars</p>
+          </div>
+          <div class="progress-demo">
+            <div class="progress-item">
+              <div class="progress-header">
+                <span class="progress-label">Storage</span>
+                <span class="progress-value">75%</span>
+              </div>
+              <div class="progress-track">
+                <div class="progress-fill" style="width:75%"></div>
+              </div>
+            </div>
+            <div class="progress-item">
+              <div class="progress-header">
+                <span class="progress-label">Profile completion</span>
+                <span class="progress-value">100%</span>
+              </div>
+              <div class="progress-track">
+                <div class="progress-fill progress-fill-success" style="width:100%"></div>
+              </div>
+            </div>
+            <div class="progress-item">
+              <div class="progress-header">
+                <span class="progress-label">Quota usage</span>
+                <span class="progress-value">45%</span>
+              </div>
+              <div class="progress-track">
+                <div class="progress-fill" style="width:45%"></div>
+              </div>
+            </div>
+            <div class="progress-item">
+              <div class="progress-header">
+                <span class="progress-label">Upload</span>
+                <span class="progress-value">30%</span>
+              </div>
+              <div class="progress-track">
+                <div class="progress-fill progress-fill-warning" style="width:30%"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Disclaimer -->
+        <div class="disclaimer-card">
+          <h3 class="disclaimer-title">Important Points</h3>
+          <ul class="disclaimer-list">
+            <li>Data shown is for reference only. Please verify with official records before making decisions.</li>
+            <li>Updates may take up to 24 hours to reflect in the dashboard.</li>
+            <li>For support or discrepancies, contact your administrator.</li>
+          </ul>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- Modal -->
+  <div class="modal-backdrop" id="modal-backdrop" aria-hidden="true"></div>
+  <div class="modal" id="app-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h2 class="modal-title" id="modal-title">Modal</h2>
+        <button type="button" class="btn-close-modal" id="btn-close-modal" aria-label="Close">
+          <svg class="icon-svg" aria-hidden="true"><use href="#icon-x"></use></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form class="modal-form" id="modal-form">
+          <div class="form-group">
+            <label class="form-label" for="modal-name">Name <span class="required">*</span></label>
+            <input type="text" id="modal-name" class="form-input" placeholder="Enter name">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="modal-email">Email <span class="required">*</span></label>
+            <input type="email" id="modal-email" class="form-input" placeholder="Enter email">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="modal-message">Message</label>
+            <textarea id="modal-message" class="form-input form-textarea" placeholder="Enter your message" rows="3"></textarea>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-cancel" id="btn-modal-cancel">Cancel</button>
+        <button type="submit" form="modal-form" class="btn-submit" id="btn-modal-confirm">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Offcanvas -->
+  <div class="offcanvas-backdrop" id="offcanvas-backdrop" aria-hidden="true"></div>
+  <div class="offcanvas" id="add-student-offcanvas" role="dialog" aria-modal="true" aria-labelledby="offcanvas-title" aria-hidden="true">
+    <div class="offcanvas-header">
+      <h2 class="offcanvas-title" id="offcanvas-title">Add Student</h2>
+      <button type="button" class="btn-close-offcanvas" id="btn-close-offcanvas" aria-label="Close">
+        <svg class="icon-svg" aria-hidden="true"><use href="#icon-x"></use></svg>
+      </button>
+    </div>
+    <div class="offcanvas-body">
+      <form class="offcanvas-form" id="offcanvas-form">
+        <div class="form-section">
+          <h3 class="form-section-title">Basic Information</h3>
+          <div class="form-group">
+            <label class="form-label" for="student-name">Student Name <span class="required">*</span></label>
+            <input type="text" id="student-name" class="form-input" placeholder="Enter student name">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="student-email">Email Address <span class="required">*</span></label>
+            <input type="email" id="student-email" class="form-input" placeholder="Enter email address">
+            <p class="form-helper">Login and password reset link will be sent to this email</p>
+          </div>
+        </div>
+        <div class="form-section">
+          <h3 class="form-section-title">Date Range</h3>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="date-from">From</label>
+              <input type="date" id="date-from" class="form-input">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="date-to">To</label>
+              <input type="date" id="date-to" class="form-input">
+            </div>
+          </div>
+        </div>
+        <div class="form-section">
+          <h3 class="form-section-title">Input States</h3>
+          <div class="form-group">
+            <label class="form-label" for="input-error">Error state</label>
+            <input type="text" id="input-error" class="form-input form-input-error" placeholder="Invalid value" value="invalid@">
+            <p class="form-helper form-helper-error">Please enter a valid email address</p>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="input-success">Success state</label>
+            <input type="text" id="input-success" class="form-input form-input-success" placeholder="Valid value" value="john@example.com">
+            <p class="form-helper form-helper-success">Looks good!</p>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="input-disabled">Disabled state</label>
+            <input type="text" id="input-disabled" class="form-input" placeholder="Disabled" disabled value="Cannot edit">
+          </div>
+        </div>
+        <div class="form-section">
+          <h3 class="form-section-title">File Upload</h3>
+          <div class="form-group">
+            <label class="form-label">Documents</label>
+            <div class="file-upload" id="file-upload-area">
+              <input type="file" id="file-input" class="file-input-hidden" multiple accept=".pdf,.doc,.docx">
+              <div class="file-upload-content">
+                <svg class="file-upload-icon" aria-hidden="true"><use href="#icon-file-text"></use></svg>
+                <p class="file-upload-text">Drag and drop files here, or <span class="file-upload-browse">browse</span> to upload</p>
+                <p class="file-upload-hint">PDF, DOC, DOCX up to 10MB</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="form-section">
+          <h3 class="form-section-title">Preferences</h3>
+          <div class="form-group form-group-row">
+            <label class="form-label form-label-checkbox" for="show-featured">
+              <input type="checkbox" id="show-featured" class="form-checkbox">
+              <span>Show Featured Programs Lead</span>
+            </label>
+            <span class="form-helper-inline">Disabled</span>
+          </div>
+        </div>
+        <div class="form-section">
+          <h3 class="form-section-title">Assignment</h3>
+          <div class="form-group">
+            <label class="form-label" for="student-associate">Associate <span class="required">*</span></label>
+            <select id="student-associate" class="form-select">
+              <option value="">Select an associate</option>
+              <option value="abc">ABC Academy</option>
+              <option value="xyz">XYZ Institute</option>
+              <option value="direct">Direct</option>
+            </select>
+            <p class="form-helper">No associates added yet</p>
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="offcanvas-footer">
+      <button type="button" class="btn-cancel" id="btn-offcanvas-cancel">Cancel</button>
+      <button type="submit" form="offcanvas-form" class="btn-submit">Add</button>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      var sidebar = document.getElementById('sidebar');
+      var mainWithSidebar = document.getElementById('main-with-sidebar');
+      var overlay = document.getElementById('sidebar-overlay');
+      var toggleBtn = document.getElementById('sidebar-toggle-inline');
+
+      function toggleSidebar() {
+        var isCollapsed = sidebar.classList.contains('is-collapsed');
+        var isMobile = window.matchMedia('(max-width: 1023px)').matches;
+
+        if (isMobile) {
+          sidebar.classList.toggle('is-open');
+          var isOpen = sidebar.classList.contains('is-open');
+          overlay.classList.toggle('is-visible', isOpen);
+          document.body.classList.toggle('sidebar-open', isOpen);
+          toggleBtn.setAttribute('aria-expanded', isOpen);
+        } else {
+          sidebar.classList.toggle('is-collapsed');
+          var collapsed = sidebar.classList.contains('is-collapsed');
+          mainWithSidebar.classList.toggle('sidebar-collapsed', collapsed);
+          toggleBtn.setAttribute('aria-expanded', !collapsed);
+        }
+      }
+
+      function closeSidebarOnMobile() {
+        if (window.matchMedia('(max-width: 1023px)').matches) {
+          sidebar.classList.remove('is-open');
+          overlay.classList.remove('is-visible');
+          document.body.classList.remove('sidebar-open');
+          toggleBtn.setAttribute('aria-expanded', 'false');
+        }
+      }
+
+      if (toggleBtn) toggleBtn.addEventListener('click', toggleSidebar);
+      if (overlay) overlay.addEventListener('click', closeSidebarOnMobile);
+
+      window.addEventListener('resize', function () {
+        if (window.matchMedia('(min-width: 1024px)').matches) {
+          sidebar.classList.remove('is-open');
+          overlay.classList.remove('is-visible');
+          document.body.classList.remove('sidebar-open');
+          toggleBtn.setAttribute('aria-expanded', 'true');
+        } else {
+          sidebar.classList.remove('is-collapsed');
+          mainWithSidebar.classList.remove('sidebar-collapsed');
+        }
+      });
+    })();
+
+    (function () {
+      var backdrop = document.getElementById('offcanvas-backdrop');
+      var offcanvas = document.getElementById('add-student-offcanvas');
+      var btnOpen = document.getElementById('btn-open-offcanvas');
+      var btnClose = document.getElementById('btn-close-offcanvas');
+      var btnCancel = document.getElementById('btn-offcanvas-cancel');
+
+      function openOffcanvas() {
+        backdrop.classList.add('is-visible');
+        offcanvas.classList.add('is-open');
+        backdrop.setAttribute('aria-hidden', 'false');
+        offcanvas.setAttribute('aria-hidden', 'false');
+        document.body.style.overflow = 'hidden';
+      }
+
+      function closeOffcanvas() {
+        backdrop.classList.remove('is-visible');
+        offcanvas.classList.remove('is-open');
+        backdrop.setAttribute('aria-hidden', 'true');
+        offcanvas.setAttribute('aria-hidden', 'true');
+        document.body.style.overflow = '';
+      }
+
+      btnOpen.addEventListener('click', openOffcanvas);
+      btnClose.addEventListener('click', closeOffcanvas);
+      btnCancel.addEventListener('click', closeOffcanvas);
+      backdrop.addEventListener('click', closeOffcanvas);
+
+      offcanvas.querySelector('form').addEventListener('submit', function (e) {
+        e.preventDefault();
+        closeOffcanvas();
+      });
+    })();
+
+    (function () {
+      var uploadArea = document.getElementById('file-upload-area');
+      var fileInput = document.getElementById('file-input');
+      if (!uploadArea || !fileInput) return;
+
+      ['dragenter', 'dragover'].forEach(function (e) {
+        uploadArea.addEventListener(e, function (ev) {
+          ev.preventDefault();
+          uploadArea.classList.add('is-dragover');
+        });
+      });
+
+      ['dragleave', 'drop'].forEach(function (e) {
+        uploadArea.addEventListener(e, function (ev) {
+          ev.preventDefault();
+          uploadArea.classList.remove('is-dragover');
+          if (e === 'drop' && ev.dataTransfer.files.length) {
+            fileInput.files = ev.dataTransfer.files;
+          }
+        });
+      });
+    })();
+
+    (function () {
+      var modalBackdrop = document.getElementById('modal-backdrop');
+      var modal = document.getElementById('app-modal');
+      var btnOpenModal = document.getElementById('btn-open-modal');
+      var btnCloseModal = document.getElementById('btn-close-modal');
+      var btnModalCancel = document.getElementById('btn-modal-cancel');
+      var btnModalConfirm = document.getElementById('btn-modal-confirm');
+
+      function openModal() {
+        modalBackdrop.classList.add('is-visible');
+        modal.classList.add('is-open');
+        modalBackdrop.setAttribute('aria-hidden', 'false');
+        modal.setAttribute('aria-hidden', 'false');
+        document.body.style.overflow = 'hidden';
+      }
+
+      function closeModal() {
+        modalBackdrop.classList.remove('is-visible');
+        modal.classList.remove('is-open');
+        modalBackdrop.setAttribute('aria-hidden', 'true');
+        modal.setAttribute('aria-hidden', 'true');
+        document.body.style.overflow = '';
+      }
+
+      if (btnOpenModal) btnOpenModal.addEventListener('click', openModal);
+      btnCloseModal.addEventListener('click', closeModal);
+      btnModalCancel.addEventListener('click', closeModal);
+      btnModalConfirm.addEventListener('click', closeModal);
+      modalBackdrop.addEventListener('click', closeModal);
+
+      document.getElementById('modal-form').addEventListener('submit', function (e) {
+        e.preventDefault();
+        closeModal();
+      });
+    })();
+
+    (function () {
+      document.querySelectorAll('.alert-dismiss').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          btn.closest('.alert').style.display = 'none';
+        });
+      });
+    })();
+
+    (function () {
+      document.querySelectorAll('.tab-btn').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var tabId = btn.getAttribute('data-tab');
+          document.querySelectorAll('.tab-btn').forEach(function (b) {
+            b.classList.remove('active');
+            b.setAttribute('aria-selected', 'false');
+          });
+          document.querySelectorAll('.tab-panel').forEach(function (p) {
+            p.classList.remove('active');
+            p.hidden = true;
+          });
+          btn.classList.add('active');
+          btn.setAttribute('aria-selected', 'true');
+          var panel = document.getElementById('tab-' + tabId);
+          if (panel) {
+            panel.classList.add('active');
+            panel.hidden = false;
+          }
+        });
+      });
+    })();
+
+    (function () {
+      var btnSearch = document.getElementById('btn-search');
+      var btnClear = document.getElementById('btn-clear-filters');
+      var searchInput = document.querySelector('.search-input');
+      var filterStatus = document.getElementById('filter-status');
+      var filterCategory = document.getElementById('filter-category');
+      var filterSort = document.getElementById('filter-sort');
+
+      if (btnSearch) btnSearch.addEventListener('click', function () {
+        btnClear.removeAttribute('hidden');
+      });
+
+      if (btnClear) btnClear.addEventListener('click', function () {
+        if (searchInput) searchInput.value = '';
+        if (filterStatus) filterStatus.value = '';
+        if (filterCategory) filterCategory.value = '';
+        if (filterSort) filterSort.value = 'name';
+        btnClear.setAttribute('hidden', '');
+      });
+    })();
+  </script>
+</body>
+</html>

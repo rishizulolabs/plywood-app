@@ -1,0 +1,206 @@
+/* Admin theme components scoped for Filament dashboard content */
+.fi-main .icon-svg,
+.fi-main .nav-icon-svg,
+.fi-main .btn-icon-svg {
+  display: inline-block;
+  width: 1rem;
+  height: 1.25rem;
+  flex-shrink: 0;
+  vertical-align: middle;
+}
+
+.fi-main .stat-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+
+.fi-main .stat-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+  padding: 1.25rem;
+}
+
+.fi-main .stat-card-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 0.5rem;
+  flex-shrink: 0;
+}
+
+.fi-main .stat-card-icon .icon-svg {
+  width: 1.25rem;
+  height: 1.25rem;
+  color: inherit;
+}
+
+.fi-main .stat-card-icon-blue { background: #eff6ff; color: #2563eb; }
+.fi-main .stat-card-icon-green { background: #ecfdf5; color: #059669; }
+.fi-main .stat-card-icon-amber { background: #fffbeb; color: #d97706; }
+.fi-main .stat-card-icon-purple { background: #f5f3ff; color: #7c3aed; }
+
+.fi-main .stat-label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #6b7280;
+  margin: 0 0 0.25rem;
+}
+
+.fi-main .stat-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #111827;
+  margin: 0;
+}
+
+.fi-main .stat-desc {
+  font-size: 0.75rem;
+  color: #9ca3af;
+  margin: 0.25rem 0 0;
+}
+
+.fi-main .content-card {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+  overflow: hidden;
+}
+
+.fi-main .content-card-header {
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid #f3f4f6;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.fi-main .content-card-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #111827;
+  margin: 0;
+}
+
+.fi-main .content-card-body {
+  padding: 1.5rem;
+}
+
+.fi-main .badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.125rem 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  border-radius: 9999px;
+}
+
+.fi-main .badge-yellow { background: #fef3c7; color: #92400e; }
+.fi-main .badge-green { background: #d1fae5; color: #065f46; }
+.fi-main .badge-gray { background: #f3f4f6; color: #374151; border: 1px solid #e5e7eb; }
+
+.fi-main .btn-add {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #fff;
+  background: #2563eb;
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.2s;
+}
+
+.fi-main .btn-add:hover { background: #1d4ed8; }
+
+.fi-main .btn-modal {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #374151;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.2s;
+}
+
+.fi-main .btn-modal:hover { background: #f9fafb; }
+
+.fi-main .info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 0.75rem;
+}
+
+.fi-main .info-tile {
+  padding: 1rem;
+  background: #f9fafb;
+  border-radius: 0.5rem;
+  border: 1px solid #f3f4f6;
+}
+
+.fi-main .info-tile-label {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #6b7280;
+  margin: 0 0 0.25rem;
+}
+
+.fi-main .info-tile-value {
+  font-size: 0.875rem;
+  color: #374151;
+  margin: 0;
+}
+
+html.fi.dark .fi-main .stat-card,
+html.fi.dark .fi-main .content-card {
+  background: #1f2937;
+  border-color: #374151;
+}
+
+html.fi.dark .fi-main .stat-value,
+html.fi.dark .fi-main .content-card-title {
+  color: #f9fafb;
+}
+
+html.fi.dark .fi-main .stat-label,
+html.fi.dark .fi-main .stat-desc {
+  color: #9ca3af;
+}
+
+html.fi.dark .fi-main .info-tile {
+  background: #111827;
+  border-color: #374151;
+}
+
+html.fi.dark .fi-main .info-tile-value {
+  color: #d1d5db;
+}
+
+html.fi.dark .fi-main .btn-modal {
+  background: #374151;
+  border-color: #4b5563;
+  color: #f9fafb;
+}
