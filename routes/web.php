@@ -9,8 +9,15 @@ use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\Admin\ProductController as AdminProductController;
 use App\Http\Controllers\Admin\SettingsController as AdminSettingsController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
+use App\Http\Controllers\Customer\CatalogController as CustomerCatalogController;
 use App\Http\Controllers\Customer\DashboardController as CustomerDashboardController;
+use App\Http\Controllers\Customer\InquiryCartController as CustomerInquiryCartController;
+use App\Http\Controllers\Customer\InquiryController as CustomerInquiryController;
+use App\Http\Controllers\Customer\OrderController as CustomerOrderController;
 use App\Http\Controllers\Distributor\DashboardController as DistributorDashboardController;
+use App\Http\Controllers\Distributor\InquiryController as DistributorInquiryController;
+use App\Http\Controllers\Distributor\OrderController as DistributorOrderController;
+use App\Http\Controllers\Distributor\ProductController as DistributorProductController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PublicCatalogController;
 use Illuminate\Support\Facades\Route;
@@ -49,10 +56,18 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
 
 Route::middleware(['auth', 'role:customer'])->prefix('customer')->name('customer.')->group(function () {
     Route::get('/dashboard', [CustomerDashboardController::class, 'index'])->name('dashboard');
+    Route::get('/catalog', [CustomerCatalogController::class, 'index'])->name('catalog.index');
+    Route::post('/catalog/{product}/cart', [CustomerCatalogController::class, 'addToCart'])->name('catalog.add-to-cart');
+    Route::get('/inquiry-cart', [CustomerInquiryCartController::class, 'index'])->name('inquiry-cart.index');
+    Route::get('/inquiries', [CustomerInquiryController::class, 'index'])->name('inquiries.index');
+    Route::get('/orders', [CustomerOrderController::class, 'index'])->name('orders.index');
 });
 
 Route::middleware(['auth', 'role:distributor'])->prefix('distributor')->name('distributor.')->group(function () {
     Route::get('/', [DistributorDashboardController::class, 'index'])->name('dashboard');
+    Route::get('/products', [DistributorProductController::class, 'index'])->name('products.index');
+    Route::get('/inquiries', [DistributorInquiryController::class, 'index'])->name('inquiries.index');
+    Route::get('/orders', [DistributorOrderController::class, 'index'])->name('orders.index');
 });
 
 Route::middleware('auth')->group(function () {

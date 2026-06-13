@@ -11,16 +11,16 @@
     </x-panel.nav-section>
 
     <x-panel.nav-section title="Catalog" icon="icon-layers">
-        <x-panel.nav-link href="#" icon="icon-database">
+        <x-panel.nav-link :href="route('distributor.products.index')" :active="request()->routeIs('distributor.products.*')" icon="icon-database">
             Products
         </x-panel.nav-link>
     </x-panel.nav-section>
 
     <x-panel.nav-section title="Sales" icon="icon-file-text">
-        <x-panel.nav-link href="#" icon="icon-file-text">
+        <x-panel.nav-link :href="route('distributor.inquiries.index')" :active="request()->routeIs('distributor.inquiries.*')" icon="icon-file-text">
             Inquiries
         </x-panel.nav-link>
-        <x-panel.nav-link href="#" icon="icon-package">
+        <x-panel.nav-link :href="route('distributor.orders.index')" :active="request()->routeIs('distributor.orders.*')" icon="icon-package">
             Orders
         </x-panel.nav-link>
     </x-panel.nav-section>
