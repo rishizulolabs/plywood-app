@@ -16,18 +16,12 @@
         </x-panel.nav-link>
     </x-panel.nav-section>
 
-    <x-panel.nav-section title="Sales" icon="icon-file-text">
-        <x-panel.nav-link :href="route('distributor.inquiries.index')" :active="request()->routeIs('distributor.inquiries.*')" icon="icon-file-text">
-            Inquiries
+    <x-panel.nav-section title="Sales" icon="icon-package">
+        <x-panel.nav-link :href="route('distributor.orders.index')" :active="request()->routeIs('distributor.orders.*')" icon="icon-shopping-cart">
+            Customer Orders
         </x-panel.nav-link>
-        <x-panel.nav-link :href="route('distributor.orders.index')" :active="request()->routeIs('distributor.orders.*')" icon="icon-package">
-            Orders
-        </x-panel.nav-link>
-    </x-panel.nav-section>
-
-    <x-panel.nav-section title="Account" icon="icon-user">
-        <x-panel.nav-link :href="route('profile.edit')" :active="request()->routeIs('profile.*')" icon="icon-user">
-            Business Profile
+        <x-panel.nav-link :href="route('distributor.purchase-orders.index')" :active="request()->routeIs('distributor.purchase-orders.*')" icon="icon-file-text">
+            Purchase Orders
         </x-panel.nav-link>
     </x-panel.nav-section>
 @endsection

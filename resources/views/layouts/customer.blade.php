@@ -13,12 +13,9 @@
         </x-panel.nav-link>
     </x-panel.nav-section>
 
-    <x-panel.nav-section title="Inquiries" icon="icon-file-text">
-        <x-panel.nav-link :href="route('customer.inquiry-cart.index')" :active="request()->routeIs('customer.inquiry-cart.*')" icon="icon-shopping-cart">
-            Inquiry Cart
-        </x-panel.nav-link>
-        <x-panel.nav-link :href="route('customer.inquiries.index')" :active="request()->routeIs('customer.inquiries.*')" icon="icon-file-text">
-            My Inquiries
+    <x-panel.nav-section title="Orders" icon="icon-package">
+        <x-panel.nav-link :href="route('customer.cart.index')" :active="request()->routeIs('customer.cart.*')" icon="icon-shopping-cart">
+            Cart
         </x-panel.nav-link>
         <x-panel.nav-link :href="route('customer.orders.index')" :active="request()->routeIs('customer.orders.*')" icon="icon-package">
             Orders

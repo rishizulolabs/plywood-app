@@ -23,7 +23,7 @@
             type="text"
             name="search"
             class="search-input"
-            placeholder="Search by name, brand, grade, category or distributor..."
+            placeholder="Search by name, brand, grade, or category..."
             value="{{ $filters['search'] ?? '' }}"
         >
     </div>
@@ -51,13 +51,13 @@
         <table class="data-table">
             <thead>
                 <tr>
+                    <th class="th-image">Image</th>
                     <th>Name</th>
                     <th>Brand</th>
                     <th>Thickness</th>
                     <th>Size</th>
                     <th>Grade</th>
                     <th>Category</th>
-                    <th>Distributor</th>
                     <th>Stock</th>
                     <th class="th-actions">Actions</th>
                 </tr>
@@ -65,19 +65,27 @@
             <tbody>
                 @foreach ($products as $product)
                     <tr>
+                        <td class="td-image">
+                            @if($productImage = $product->getFirstMediaUrl('product_image') ?: $product->getFirstMediaUrl('thumbnails'))
+                                <img src="{{ $productImage }}" alt="{{ $product->name }}" class="table-product-image">
+                            @else
+                                <span class="table-product-image-placeholder" aria-hidden="true"></span>
+                            @endif
+                        </td>
                         <td>
                             <button
                                 type="button"
                                 class="btn-link-table btn-view-product"
                                 data-product="{{ e(json_encode($product->only([
                                     'name', 'brand', 'thickness', 'size', 'grade', 'core_type',
-                                    'number_of_plies', 'is_standard', 'is_isi_marked', 'warranty',
+                                    'number_of_plies', 'is_standard', 'warranty',
                                     'finish_surface', 'density', 'termite_borer_treatment',
                                     'weight_per_sheet', 'application', 'glue_type', 'country_of_origin',
                                     'min_order_qty', 'unit', 'in_stock', 'is_featured', 'description',
                                 ]) + [
                                     'category' => $product->category?->name,
-                                    'distributor' => $product->distributorProfile?->user?->name ?? $product->distributorProfile?->business_name,
+                                    'product_image' => $product->getFirstMediaUrl('product_image'),
+                                    'thumbnails' => $product->getMedia('thumbnails')->map(fn ($media) => $media->getUrl())->values(),
                                 ])) }}"
                             >
                                 {{ $product->name }}
@@ -88,7 +96,6 @@
                         <td>{{ $product->size ?? '—' }}</td>
                         <td>{{ $product->grade ?? '—' }}</td>
                         <td>{{ $product->category?->name ?? '—' }}</td>
-                        <td>{{ $product->distributorProfile?->user?->name ?? $product->distributorProfile?->business_name ?? '—' }}</td>
                         <td>
                             @if($product->in_stock)
                                 <span class="badge badge-green">In stock</span>
@@ -102,33 +109,15 @@
                                     type="button"
                                     class="btn-action btn-action-edit btn-quick-edit"
                                     title="Quick edit"
-                                    data-product="{{ e(json_encode([
-                                        'name' => $product->name,
-                                        'category_id' => $product->category_id,
-                                        'distributor_profile_id' => $product->distributor_profile_id,
-                                        'description' => $product->description,
-                                        'thickness' => $product->thickness,
-                                        'size' => $product->size,
-                                        'grade' => $product->grade,
-                                        'core_type' => $product->core_type,
-                                        'number_of_plies' => $product->number_of_plies,
-                                        'is_standard' => $product->is_standard,
-                                        'is_isi_marked' => $product->is_isi_marked ? '1' : '0',
-                                        'brand' => $product->brand,
-                                        'warranty' => $product->warranty,
-                                        'finish_surface' => $product->finish_surface,
-                                        'density' => $product->density,
-                                        'termite_borer_treatment' => $product->termite_borer_treatment ? '1' : '0',
-                                        'weight_per_sheet' => $product->weight_per_sheet,
-                                        'application' => $product->application,
-                                        'glue_type' => $product->glue_type,
-                                        'country_of_origin' => $product->country_of_origin,
-                                        'min_order_qty' => $product->min_order_qty,
-                                        'unit' => $product->unit,
-                                        'in_stock' => $product->in_stock ? '1' : '0',
-                                        'is_featured' => $product->is_featured ? '1' : '0',
-                                    ])) }}"
                                     data-action="{{ route('admin.products.update', $product) }}"
+                                    data-name="{{ $product->name }}"
+                                    data-category-id="{{ $product->category_id }}"
+                                    data-description="{{ $product->description ?? '' }}"
+                                    data-thickness="{{ $product->thickness ?? '' }}"
+                                    data-size="{{ $product->size ?? '' }}"
+                                    data-grade="{{ $product->grade ?? '' }}"
+                                    data-product-image="{{ $product->getFirstMediaUrl('product_image') }}"
+                                    data-thumbnails="{{ e(json_encode($product->getMedia('thumbnails')->map(fn ($media) => $media->getUrl())->values())) }}"
                                 >
                                     <svg class="btn-icon-svg" aria-hidden="true"><use href="#icon-edit"></use></svg>
                                 </button>
@@ -167,7 +156,7 @@
             </button>
         </div>
         <div class="modal-body">
-            <form class="modal-form" id="add-product-form" method="POST" action="{{ route('admin.products.store') }}">
+            <form class="modal-form" id="add-product-form" method="POST" action="{{ route('admin.products.store') }}" enctype="multipart/form-data">
                 @csrf
                 @include('admin.products._form-fields', ['idPrefix' => 'add_', 'values' => []])
             </form>
@@ -189,13 +178,14 @@
             </button>
         </div>
         <div class="modal-body">
-            <form class="modal-form" id="edit-product-form" method="POST" action="">
+            <form class="modal-form" id="edit-product-form" method="POST" action="" enctype="multipart/form-data">
                 @csrf
                 @method('PUT')
                 @if($hasActiveFilters)
                     <input type="hidden" name="search" value="{{ $filters['search'] }}">
                 @endif
-                @include('admin.products._form-fields', ['idPrefix' => 'edit_', 'values' => []])
+                @include('admin.products._form-fields', ['idPrefix' => 'edit_', 'values' => [], 'showMediaPreviews' => true])
+                <input type="hidden" name="_edit_product_id" id="edit-product-id" value="{{ old('_edit_product_id') }}">
             </form>
         </div>
         <div class="modal-footer">
@@ -261,22 +251,165 @@
 
     function setFieldValue(name, value) {
         var field = document.querySelector('#edit-product-form [name="' + name + '"]');
-        if (field) field.value = value ?? '';
+        if (!field) return;
+        field.value = value ?? '';
+    }
+
+    function clearFilePreviews(prefix) {
+        ['product_image_preview', 'thumbnails_preview'].forEach(function (suffix) {
+            var el = document.getElementById(prefix + suffix);
+            if (!el) return;
+            el.innerHTML = '';
+            el.hidden = true;
+        });
+    }
+
+    function bindFilePreview(inputId, previewId, multiple) {
+        var input = document.getElementById(inputId);
+        var preview = document.getElementById(previewId);
+        if (!input || !preview) return;
+
+        input.addEventListener('change', function () {
+            preview.innerHTML = '';
+
+            if (!input.files || !input.files.length) {
+                preview.hidden = true;
+                return;
+            }
+
+            if (multiple) {
+                var grid = document.createElement('div');
+                grid.className = 'product-media-preview-grid';
+
+                Array.from(input.files).forEach(function (file) {
+                    if (!file.type.startsWith('image/')) return;
+
+                    var img = document.createElement('img');
+                    img.src = URL.createObjectURL(file);
+                    img.alt = file.name;
+                    img.className = 'product-media-preview-thumb';
+                    img.onload = function () { URL.revokeObjectURL(img.src); };
+                    grid.appendChild(img);
+                });
+
+                if (!grid.children.length) {
+                    preview.hidden = true;
+                    return;
+                }
+
+                var helper = document.createElement('p');
+                helper.className = 'form-helper';
+                helper.textContent = input.files.length > 1 ? 'Selected images' : 'Selected image';
+                preview.appendChild(helper);
+                preview.appendChild(grid);
+            } else {
+                var file = input.files[0];
+                if (!file.type.startsWith('image/')) {
+                    preview.hidden = true;
+                    return;
+                }
+
+                var helper = document.createElement('p');
+                helper.className = 'form-helper';
+                helper.textContent = 'Selected image';
+
+                var img = document.createElement('img');
+                img.src = URL.createObjectURL(file);
+                img.alt = file.name;
+                img.className = 'product-media-preview-image';
+                img.onload = function () { URL.revokeObjectURL(img.src); };
+
+                preview.appendChild(helper);
+                preview.appendChild(img);
+            }
+
+            preview.hidden = false;
+        });
+    }
+
+    bindFilePreview('add_product_image', 'add_product_image_preview', false);
+    bindFilePreview('add_thumbnails', 'add_thumbnails_preview', true);
+    bindFilePreview('edit_product_image', 'edit_product_image_preview', false);
+    bindFilePreview('edit_thumbnails', 'edit_thumbnails_preview', true);
+
+    function populateEditForm(btn) {
+        var form = document.getElementById('edit-product-form');
+        if (!form || !editModal) return;
+
+        form.action = btn.getAttribute('data-action') || '';
+        var productIdInput = document.getElementById('edit-product-id');
+        var actionMatch = (form.action || '').match(/\/products\/(\d+)\/?$/);
+        if (productIdInput && actionMatch) {
+            productIdInput.value = actionMatch[1];
+        }
+        setFieldValue('name', btn.getAttribute('data-name'));
+        setFieldValue('category_id', btn.getAttribute('data-category-id'));
+        setFieldValue('description', btn.getAttribute('data-description'));
+        setFieldValue('thickness', btn.getAttribute('data-thickness'));
+        setFieldValue('size', btn.getAttribute('data-size'));
+        setFieldValue('grade', btn.getAttribute('data-grade'));
+        form.querySelectorAll('input[type="file"]').forEach(function (input) {
+            input.value = '';
+        });
+        clearFilePreviews('edit_');
+        setImagePreviews(btn);
+
+        editModal.openModal();
+    }
+
+    function setImagePreviews(btn) {
+        var wrap = document.getElementById('edit-image-previews');
+        if (!wrap) return;
+
+        var productImage = btn.getAttribute('data-product-image') || '';
+        var thumbnails = [];
+
+        try {
+            thumbnails = JSON.parse(btn.getAttribute('data-thumbnails') || '[]');
+        } catch (error) {
+            thumbnails = [];
+        }
+
+        var html = '';
+
+        if (productImage) {
+            html += '<div class="product-media-preview">' +
+                '<p class="form-helper">Current product image</p>' +
+                '<img src="' + productImage + '" alt="Product image" class="product-media-preview-image">' +
+                '</div>';
+        }
+
+        if (thumbnails.length) {
+            html += '<div class="product-media-preview">' +
+                '<p class="form-helper">Current thumbnails</p>' +
+                '<div class="product-media-preview-grid">';
+
+            thumbnails.forEach(function (url) {
+                html += '<img src="' + url + '" alt="Thumbnail" class="product-media-preview-thumb">';
+            });
+
+            html += '</div></div>';
+        }
+
+        wrap.innerHTML = html;
     }
 
     document.querySelectorAll('.btn-quick-edit').forEach(function (btn) {
-        btn.addEventListener('click', function () {
-            var form = document.getElementById('edit-product-form');
-            if (!form || !editModal) return;
+        btn.addEventListener('click', function (event) {
+            event.preventDefault();
+            event.stopPropagation();
+            populateEditForm(btn);
+        });
+    });
 
-            var data = JSON.parse(btn.getAttribute('data-product') || '{}');
-            form.action = btn.getAttribute('data-action');
+    document.querySelectorAll('#add-product-modal select, #edit-product-modal select').forEach(function (select) {
+        select.addEventListener('mousedown', function () {
+            var body = select.closest('.modal-body');
+            if (!body) return;
 
-            Object.keys(data).forEach(function (key) {
-                setFieldValue(key, data[key]);
+            window.requestAnimationFrame(function () {
+                select.scrollIntoView({ block: 'center', behavior: 'smooth' });
             });
-
-            editModal.openModal();
         });
     });
 
@@ -290,6 +423,7 @@
             if (title) title.textContent = data.name || 'Product details';
 
             wrap.innerHTML =
+                (data.product_image ? '<div class="product-media-preview"><img src="' + data.product_image + '" alt="' + (data.name || 'Product') + '" class="product-media-preview-image"></div>' : '') +
                 '<div class="product-card">' +
                     '<div class="product-card-header"><div><h3 class="product-card-title">' + (data.name || '') + '</h3>' +
                     '<p class="product-card-subtitle">' + (data.brand || '') + ' · ' + (data.category || '') + '</p></div>' +
@@ -304,7 +438,6 @@
                         specRow('Core type', data.core_type) +
                         specRow('Plies', data.number_of_plies) +
                         specRow('IS standard', data.is_standard) +
-                        specRow('ISI marked', data.is_isi_marked ? 'Yes' : 'No') +
                         specRow('Warranty', data.warranty) +
                         specRow('Finish', data.finish_surface) +
                         specRow('Glue type', data.glue_type) +
@@ -313,7 +446,6 @@
                         specRow('Termite treatment', data.termite_borer_treatment ? 'Yes' : 'No') +
                         specRow('Application', data.application) +
                         specRow('Origin', data.country_of_origin) +
-                        specRow('Distributor', data.distributor) +
                         specRow('Min order', (data.min_order_qty || '—') + ' ' + (data.unit || '')) +
                     '</dl>' +
                     (data.description ? '<p class="product-card-description">' + data.description + '</p>' : '') +
@@ -327,7 +459,21 @@
         return '<div class="product-spec-item"><dt>' + label + '</dt><dd>' + (value || '—') + '</dd></div>';
     }
 
-    @if($errors->any() && old('name') && !old('_method'))
+    @if ($errors->any() && old('_method') === 'PUT' && old('_edit_product_id'))
+        (function () {
+            var form = document.getElementById('edit-product-form');
+            if (form) {
+                form.action = @json(route('admin.products.update', old('_edit_product_id')));
+            }
+            setFieldValue('name', @json(old('name', '')));
+            setFieldValue('category_id', @json(old('category_id', '')));
+            setFieldValue('description', @json(old('description', '')));
+            setFieldValue('thickness', @json(old('thickness', '')));
+            setFieldValue('size', @json(old('size', '')));
+            setFieldValue('grade', @json(old('grade', '')));
+            if (editModal) editModal.openModal();
+        })();
+    @elseif ($errors->any() && old('name') && old('_method') !== 'PUT')
         if (addModal) addModal.openModal();
     @endif
 })();

@@ -142,7 +142,6 @@ body {
   font-weight: 500;
   color: #d1d5db;
   text-decoration: none;
-  border-left: 2px solid transparent;
   transition: background 0.15s, color 0.15s;
 }
 
@@ -154,7 +153,6 @@ body {
 .nav-link.active {
   background: rgba(37, 99, 235, 0.2);
   color: #93c5fd;
-  border-left-color: #2563eb;
 }
 
 .nav-link.active .nav-icon-svg {
@@ -817,6 +815,20 @@ body {
   background: #78350f;
   color: #fde68a;
   border-color: #d97706;
+}
+
+.status-btn-dispatched.is-active,
+.status-btn-dispatched.is-selected {
+  background: #1e3a8a;
+  color: #bfdbfe;
+  border-color: #2563eb;
+}
+
+.status-btn-cancelled.is-active,
+.status-btn-cancelled.is-selected {
+  background: #374151;
+  color: #d1d5db;
+  border-color: #6b7280;
 }
 
 .btn-action {

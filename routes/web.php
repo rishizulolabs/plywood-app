@@ -4,20 +4,19 @@ use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
 use App\Http\Controllers\Admin\CustomerController as AdminCustomerController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\DistributorController as AdminDistributorController;
-use App\Http\Controllers\Admin\InquiryController as AdminInquiryController;
+use App\Http\Controllers\Admin\DistributorOrderController as AdminDistributorOrderController;
 use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\Admin\ProductController as AdminProductController;
 use App\Http\Controllers\Admin\SettingsController as AdminSettingsController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Customer\CatalogController as CustomerCatalogController;
 use App\Http\Controllers\Customer\DashboardController as CustomerDashboardController;
-use App\Http\Controllers\Customer\InquiryCartController as CustomerInquiryCartController;
-use App\Http\Controllers\Customer\InquiryController as CustomerInquiryController;
+use App\Http\Controllers\Customer\CartController as CustomerCartController;
 use App\Http\Controllers\Customer\OrderController as CustomerOrderController;
 use App\Http\Controllers\Distributor\DashboardController as DistributorDashboardController;
-use App\Http\Controllers\Distributor\InquiryController as DistributorInquiryController;
 use App\Http\Controllers\Distributor\OrderController as DistributorOrderController;
 use App\Http\Controllers\Distributor\ProductController as DistributorProductController;
+use App\Http\Controllers\Distributor\PurchaseOrderController as DistributorPurchaseOrderController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PublicCatalogController;
 use Illuminate\Support\Facades\Route;
@@ -47,9 +46,10 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::post('/categories', [AdminCategoryController::class, 'store'])->name('categories.store');
     Route::put('/categories/{category}', [AdminCategoryController::class, 'update'])->name('categories.update');
     Route::delete('/categories/{category}', [AdminCategoryController::class, 'destroy'])->name('categories.destroy');
-    Route::get('/orders', [AdminOrderController::class, 'index'])->name('orders.index');
-    Route::post('/orders', [AdminOrderController::class, 'store'])->name('orders.store');
-    Route::get('/inquiries', [AdminInquiryController::class, 'index'])->name('inquiries.index');
+    Route::get('/customer-orders', [AdminOrderController::class, 'index'])->name('customer-orders.index');
+    Route::post('/customer-orders', [AdminOrderController::class, 'store'])->name('customer-orders.store');
+    Route::get('/distributor-orders', [AdminDistributorOrderController::class, 'index'])->name('distributor-orders.index');
+    Route::patch('/distributor-orders/{restockRequest}/status', [AdminDistributorOrderController::class, 'updateStatus'])->name('distributor-orders.status');
     Route::get('/settings', [AdminSettingsController::class, 'index'])->name('settings.index');
     Route::put('/settings', [AdminSettingsController::class, 'update'])->name('settings.update');
 });
@@ -57,17 +57,21 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
 Route::middleware(['auth', 'role:customer'])->prefix('customer')->name('customer.')->group(function () {
     Route::get('/dashboard', [CustomerDashboardController::class, 'index'])->name('dashboard');
     Route::get('/catalog', [CustomerCatalogController::class, 'index'])->name('catalog.index');
+    Route::get('/catalog/{product}', [CustomerCatalogController::class, 'show'])->name('catalog.show');
     Route::post('/catalog/{product}/cart', [CustomerCatalogController::class, 'addToCart'])->name('catalog.add-to-cart');
-    Route::get('/inquiry-cart', [CustomerInquiryCartController::class, 'index'])->name('inquiry-cart.index');
-    Route::get('/inquiries', [CustomerInquiryController::class, 'index'])->name('inquiries.index');
+    Route::get('/cart', [CustomerCartController::class, 'index'])->name('cart.index');
+    Route::delete('/cart/items/{product}', [CustomerCartController::class, 'remove'])->name('cart.remove');
+    Route::post('/cart/proceed', [CustomerCartController::class, 'proceed'])->name('cart.proceed');
     Route::get('/orders', [CustomerOrderController::class, 'index'])->name('orders.index');
 });
 
 Route::middleware(['auth', 'role:distributor'])->prefix('distributor')->name('distributor.')->group(function () {
     Route::get('/', [DistributorDashboardController::class, 'index'])->name('dashboard');
     Route::get('/products', [DistributorProductController::class, 'index'])->name('products.index');
-    Route::get('/inquiries', [DistributorInquiryController::class, 'index'])->name('inquiries.index');
+    Route::post('/products/{product}/restock', [DistributorProductController::class, 'restock'])->name('products.restock');
     Route::get('/orders', [DistributorOrderController::class, 'index'])->name('orders.index');
+    Route::patch('/orders/{order}/status', [DistributorOrderController::class, 'updateStatus'])->name('orders.status');
+    Route::get('/purchase-orders', [DistributorPurchaseOrderController::class, 'index'])->name('purchase-orders.index');
 });
 
 Route::middleware('auth')->group(function () {

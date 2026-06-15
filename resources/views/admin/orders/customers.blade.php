@@ -1,8 +1,8 @@
 @extends('layouts.admin')
 
-@section('title', 'Orders')
-@section('page-title', 'Orders')
-@section('page-subtitle', 'Confirmed orders')
+@section('title', 'Customer Orders')
+@section('page-title', 'Customer Orders')
+@section('page-subtitle', 'Orders placed by customers')
 
 @section('content')
 <div class="stat-cards">
@@ -22,12 +22,12 @@
 
 <div class="content-card space-y" style="margin-top: 1.5rem;">
     <div class="content-card-header">
-        <p class="content-card-title">Orders</p>
+        <p class="content-card-title">Customer orders</p>
         <span class="badge badge-gray">{{ $orders->total() }} total</span>
     </div>
 
     @if($orders->isEmpty())
-        <x-admin.empty-state message="No orders found." />
+        <x-admin.empty-state message="No customer orders found." />
     @else
         <table class="data-table">
             <thead>

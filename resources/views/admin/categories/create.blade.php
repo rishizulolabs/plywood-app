@@ -13,10 +13,6 @@
                 <label class="form-label">Name <span class="text-danger">*</span></label>
                 <input type="text" name="name" class="form-control" value="{{ old('name') }}" required>
             </div>
-            <div class="mb-3">
-                <label class="form-label">Description</label>
-                <textarea name="description" class="form-control" rows="3">{{ old('description') }}</textarea>
-            </div>
             <div class="mb-3 form-check">
                 <input type="checkbox" name="is_active" class="form-check-input" id="is_active" value="1" checked>
                 <label class="form-check-label" for="is_active">Active</label>

@@ -30,10 +30,10 @@
 
             <div class="max-w-md">
                 <h1 class="text-3xl xl:text-4xl font-bold leading-tight tracking-tight">
-                    B2B plywood quotes, simplified
+                    B2B plywood ordering, simplified
                 </h1>
                 <p class="mt-4 text-blue-100 text-base leading-relaxed">
-                    Browse products, submit inquiries, and receive custom quotes from verified distributors — no public pricing.
+                    Browse products, add to cart, and place orders with verified distributors.
                 </p>
                 <ul class="mt-8 space-y-4">
                     <li class="flex items-start gap-3 text-sm text-blue-50">
@@ -42,11 +42,11 @@
                     </li>
                     <li class="flex items-start gap-3 text-sm text-blue-50">
                         <span class="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-white/20 text-xs">2</span>
-                        Request quotes tailored to your project
+                        Add products to your cart
                     </li>
                     <li class="flex items-start gap-3 text-sm text-blue-50">
                         <span class="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-white/20 text-xs">3</span>
-                        Confirm orders after distributor negotiation
+                        Place orders directly with distributors
                     </li>
                 </ul>
             </div>

@@ -27,12 +27,12 @@
     </div>
     <div class="content-card-body" style="padding: 1.5rem;">
         <p style="margin: 0 0 1.5rem; font-size: 0.875rem; color: #6b7280; line-height: 1.6;">
-            Manage your B2B plywood marketplace — distributors, customers, products, inquiries, and orders.
+            Manage your B2B plywood marketplace — distributors, customers, products, and orders.
         </p>
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.75rem;">
             <div style="padding: 1rem; background: #f9fafb; border-radius: 0.5rem; border: 1px solid #f3f4f6;">
                 <p style="margin: 0 0 0.25rem; font-size: 0.6875rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: #6b7280;">Workflow</p>
-                <p style="margin: 0; font-size: 0.875rem; color: #374151;">Customer inquiry → Distributor quote → Order</p>
+                <p style="margin: 0; font-size: 0.875rem; color: #374151;">Customer cart → Order → Fulfillment</p>
             </div>
             <div style="padding: 1rem; background: #f9fafb; border-radius: 0.5rem; border: 1px solid #f3f4f6;">
                 <p style="margin: 0 0 0.25rem; font-size: 0.6875rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: #6b7280;">Pricing</p>

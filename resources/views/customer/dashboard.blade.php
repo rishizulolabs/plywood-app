@@ -2,11 +2,11 @@
 
 @section('title', 'Dashboard')
 @section('page-title', 'Dashboard')
-@section('page-subtitle', 'Track inquiries, quotes, and orders')
+@section('page-subtitle', 'Browse products, manage your cart, and track orders')
 
 @section('content')
 <div class="customer-dashboard-page">
-<div class="stat-cards stat-cards-4 customer-dashboard-stats">
+<div class="stat-cards stat-cards-3 customer-dashboard-stats">
     @foreach ($stats as $stat)
         <a href="{{ $stat['href'] }}" class="stat-card stat-card-link">
             <div class="stat-card-icon stat-card-icon-{{ $stat['color'] }}">
@@ -28,8 +28,7 @@
                 <p class="customer-welcome-eyebrow">Customer portal</p>
                 <h2 class="customer-welcome-title">Welcome back, {{ $user->name }}</h2>
                 <p class="customer-welcome-text">
-                    Browse plywood products, add items to your inquiry cart, and request custom quotes from distributors.
-                    Pricing is shared only after a distributor responds.
+                    Browse plywood products, add items to your cart, and place orders directly with distributors.
                 </p>
             </div>
             <div class="customer-welcome-avatar" aria-hidden="true">
@@ -86,7 +85,7 @@
     </div>
 </div>
 
-@if($inquiryCount === 0)
+@if($orderCount === 0)
     <div class="content-card customer-getting-started">
         <div class="content-card-header">
             <p class="content-card-title">Getting started</p>
@@ -103,15 +102,15 @@
             <div class="customer-step">
                 <span class="customer-step-number">2</span>
                 <div>
-                    <p class="customer-step-title">Add to inquiry cart</p>
+                    <p class="customer-step-title">Add to cart</p>
                     <p class="customer-step-desc">Select products and quantities for your project.</p>
                 </div>
             </div>
             <div class="customer-step">
                 <span class="customer-step-number">3</span>
                 <div>
-                    <p class="customer-step-title">Request a quote</p>
-                    <p class="customer-step-desc">Distributors respond with custom pricing.</p>
+                    <p class="customer-step-title">Place your order</p>
+                    <p class="customer-step-desc">Proceed from your cart to send the order to a distributor.</p>
                 </div>
             </div>
         </div>
@@ -123,39 +122,39 @@
         </div>
     </div>
 @else
-    <div class="content-card space-y customer-recent-inquiries">
+    <div class="content-card space-y customer-recent-orders">
         <div class="content-card-header">
-            <p class="content-card-title">Recent inquiries</p>
-            <a href="{{ route('customer.inquiries.index') }}" class="btn-link-table">View all</a>
+            <p class="content-card-title">Recent orders</p>
+            <a href="{{ route('customer.orders.index') }}" class="btn-link-table">View all</a>
         </div>
 
-        @if($recentInquiries->isEmpty())
-            <x-admin.empty-state message="No recent inquiries." />
+        @if($recentOrders->isEmpty())
+            <x-admin.empty-state message="No recent orders." />
         @else
             <table class="data-table">
                 <thead>
                     <tr>
-                        <th>Inquiry #</th>
+                        <th>Order #</th>
                         <th>Distributor</th>
+                        <th>Products</th>
+                        <th>Total</th>
                         <th>Status</th>
-                        <th>Quote</th>
                         <th>Date</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach ($recentInquiries as $inquiry)
+                    @foreach ($recentOrders as $order)
+                        @php
+                            $items = $order->inquiry?->items ?? collect();
+                            $productLabel = $items->map(fn ($item) => ($item->product?->name ?? 'Product').' × '.$item->quantity)->join(', ');
+                        @endphp
                         <tr>
-                            <td>{{ $inquiry->inquiry_number }}</td>
-                            <td>{{ $inquiry->distributorProfile?->business_name ?? '—' }}</td>
-                            <td><span class="badge badge-yellow">{{ ucfirst($inquiry->status) }}</span></td>
-                            <td>
-                                @if($inquiry->quote)
-                                    <span class="badge badge-green">{{ format_inr($inquiry->quote->total) }}</span>
-                                @else
-                                    <span class="badge badge-gray">Pending</span>
-                                @endif
-                            </td>
-                            <td>{{ $inquiry->created_at?->format('d M Y') ?? '—' }}</td>
+                            <td>{{ $order->order_number }}</td>
+                            <td>{{ $order->distributorProfile?->business_name ?? '—' }}</td>
+                            <td>{{ $productLabel ?: '—' }}</td>
+                            <td>{{ format_inr($order->total_amount) }}</td>
+                            <td><span class="badge badge-yellow">{{ ucfirst($order->fulfillment_status) }}</span></td>
+                            <td>{{ $order->created_at?->format('d M Y') ?? '—' }}</td>
                         </tr>
                     @endforeach
                 </tbody>

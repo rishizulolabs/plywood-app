@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers\Customer;
 
-use App\Models\Inquiry;
 use App\Models\Order;
+use App\Support\CustomerCart;
 use Illuminate\View\View;
 
 class DashboardController extends CustomerController
@@ -12,52 +12,43 @@ class DashboardController extends CustomerController
     {
         $user = $this->customer();
 
-        $inquiryCount = $user->inquiries()->count();
         $orderCount = $user->orders()->count();
-        $pendingQuotesCount = $user->inquiries()
-            ->whereIn('status', ['pending', 'quoted', 'negotiating'])
+        $processingCount = $user->orders()
+            ->where('fulfillment_status', 'processing')
             ->count();
-        $cartItemCount = count(session('inquiry_cart', []));
+        $cartItemCount = CustomerCart::count($user);
 
-        $recentInquiries = Inquiry::query()
+        $recentOrders = Order::query()
             ->where('customer_id', $user->id)
-            ->with(['distributorProfile', 'quote'])
+            ->with(['distributorProfile', 'inquiry.items.product'])
             ->latest()
             ->limit(5)
             ->get();
 
         $stats = [
             [
-                'label' => 'Inquiries',
-                'value' => $inquiryCount,
-                'desc' => 'Quote requests sent',
-                'color' => 'blue',
-                'icon' => 'icon-file-text',
-                'href' => route('customer.inquiries.index'),
-            ],
-            [
                 'label' => 'Orders',
                 'value' => $orderCount,
-                'desc' => 'Confirmed purchases',
+                'desc' => 'Orders placed',
                 'color' => 'green',
                 'icon' => 'icon-package',
                 'href' => route('customer.orders.index'),
             ],
             [
-                'label' => 'Pending quotes',
-                'value' => $pendingQuotesCount,
-                'desc' => 'Awaiting distributor response',
+                'label' => 'Processing',
+                'value' => $processingCount,
+                'desc' => 'Awaiting fulfillment',
                 'color' => 'amber',
-                'icon' => 'icon-dollar-sign',
-                'href' => route('customer.inquiries.index'),
+                'icon' => 'icon-activity',
+                'href' => route('customer.orders.index'),
             ],
             [
                 'label' => 'Cart items',
                 'value' => $cartItemCount,
-                'desc' => 'Ready to submit',
+                'desc' => 'Ready to order',
                 'color' => 'purple',
                 'icon' => 'icon-shopping-cart',
-                'href' => route('customer.inquiry-cart.index'),
+                'href' => route('customer.cart.index'),
             ],
         ];
 
@@ -70,18 +61,11 @@ class DashboardController extends CustomerController
                 'color' => 'blue',
             ],
             [
-                'title' => 'Inquiry cart',
-                'desc' => 'Review products before requesting a quote',
+                'title' => 'Cart',
+                'desc' => 'Review products before placing an order',
                 'icon' => 'icon-shopping-cart',
-                'href' => route('customer.inquiry-cart.index'),
+                'href' => route('customer.cart.index'),
                 'color' => 'purple',
-            ],
-            [
-                'title' => 'My inquiries',
-                'desc' => 'Track quote requests and responses',
-                'icon' => 'icon-file-text',
-                'href' => route('customer.inquiries.index'),
-                'color' => 'amber',
             ],
             [
                 'title' => 'My orders',
@@ -90,14 +74,21 @@ class DashboardController extends CustomerController
                 'href' => route('customer.orders.index'),
                 'color' => 'green',
             ],
+            [
+                'title' => 'Profile',
+                'desc' => 'Update company and delivery details',
+                'icon' => 'icon-user',
+                'href' => route('profile.edit'),
+                'color' => 'amber',
+            ],
         ];
 
         return view('customer.dashboard', compact(
             'user',
             'stats',
             'quickActions',
-            'recentInquiries',
-            'inquiryCount',
+            'recentOrders',
+            'orderCount',
         ));
     }
 }

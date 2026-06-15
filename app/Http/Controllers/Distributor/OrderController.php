@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Distributor;
 
 use App\Models\Order;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\View\View;
 
@@ -49,5 +51,26 @@ class OrderController extends DistributorController
         ] : [];
 
         return view('distributor.orders.index', compact('profile', 'orders', 'stats'));
+    }
+
+    public function updateStatus(Request $request, Order $order): RedirectResponse
+    {
+        $profile = $this->distributorProfile();
+
+        if (! $profile || $order->distributor_profile_id !== $profile->id) {
+            abort(403);
+        }
+
+        $validated = $request->validate([
+            'fulfillment_status' => ['required', 'in:processing,dispatched,delivered,cancelled'],
+        ]);
+
+        $order->update([
+            'fulfillment_status' => $validated['fulfillment_status'],
+        ]);
+
+        return redirect()
+            ->route('distributor.orders.index')
+            ->with('success', "Order {$order->order_number} status updated.");
     }
 }

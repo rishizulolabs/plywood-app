@@ -52,7 +52,6 @@
 /* Nav items — admin theme active state */
 .fi-sidebar-item.fi-active > .fi-sidebar-item-btn {
   background-color: #eff6ff !important;
-  border-left: 2px solid #2563eb !important;
   border-radius: 0.375rem !important;
 }
 
@@ -133,7 +132,6 @@ html.fi.dark .fi-topbar {
 
 html.fi.dark .fi-sidebar-item.fi-active > .fi-sidebar-item-btn {
   background-color: #1e3a5f !important;
-  border-left-color: #2563eb !important;
 }
 
 html.fi.dark .fi-sidebar-item.fi-active > .fi-sidebar-item-btn > .fi-sidebar-item-label,

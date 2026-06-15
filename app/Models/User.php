@@ -59,6 +59,11 @@ class User extends Authenticatable implements FilamentUser
         return $this->hasMany(Order::class, 'customer_id');
     }
 
+    public function cartItems(): HasMany
+    {
+        return $this->hasMany(CartItem::class);
+    }
+
     public function messages(): HasMany
     {
         return $this->hasMany(Message::class, 'sender_id');

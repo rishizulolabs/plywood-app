@@ -52,7 +52,6 @@
             <thead>
                 <tr>
                     <th>Name</th>
-                    <th>Products</th>
                     <th class="th-actions">Actions</th>
                 </tr>
             </thead>
@@ -60,7 +59,6 @@
                 @foreach ($categories as $category)
                     <tr>
                         <td>{{ $category->name }}</td>
-                        <td>{{ $category->products_count }}</td>
                         <td>
                             <div class="table-actions">
                                 <button
@@ -68,7 +66,6 @@
                                     class="btn-action btn-action-edit btn-quick-edit"
                                     title="Quick edit"
                                     data-name="{{ $category->name }}"
-                                    data-description="{{ $category->description ?? '' }}"
                                     data-action="{{ route('admin.categories.update', $category) }}"
                                 >
                                     <svg class="btn-icon-svg" aria-hidden="true"><use href="#icon-edit"></use></svg>
@@ -138,19 +135,6 @@
                         <p class="form-helper form-helper-error">{{ $message }}</p>
                     @enderror
                 </div>
-
-                <div class="form-group">
-                    <label class="form-label" for="category-description">Description</label>
-                    <textarea
-                        id="category-description"
-                        name="description"
-                        class="form-input form-textarea @error('description') form-input-error @enderror"
-                        placeholder="Optional description"
-                    >{{ old('description') }}</textarea>
-                    @error('description')
-                        <p class="form-helper form-helper-error">{{ $message }}</p>
-                    @enderror
-                </div>
             </form>
         </div>
         <div class="modal-footer">
@@ -187,11 +171,6 @@
                 <div class="form-group">
                     <label class="form-label" for="edit-category-name">Name <span class="required">*</span></label>
                     <input type="text" id="edit-category-name" name="name" class="form-input" required>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label" for="edit-category-description">Description</label>
-                    <textarea id="edit-category-description" name="description" class="form-input form-textarea" placeholder="Optional description"></textarea>
                 </div>
             </form>
         </div>
@@ -248,7 +227,6 @@
 
             form.action = btn.getAttribute('data-action');
             document.getElementById('edit-category-name').value = btn.getAttribute('data-name') || '';
-            document.getElementById('edit-category-description').value = btn.getAttribute('data-description') || '';
 
             editModal.openModal();
         });

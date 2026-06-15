@@ -35,11 +35,11 @@
     </x-panel.nav-section>
 
     <x-panel.nav-section title="Sales" icon="icon-file-text">
-        <x-panel.nav-link :href="route('admin.orders.index')" :active="request()->routeIs('admin.orders.*')" icon="icon-file-text">
-            Orders
+        <x-panel.nav-link :href="route('admin.customer-orders.index')" :active="request()->routeIs('admin.customer-orders.*')" icon="icon-shopping-cart">
+            Customer Orders
         </x-panel.nav-link>
-        <x-panel.nav-link :href="route('admin.inquiries.index')" :active="request()->routeIs('admin.inquiries.*')" icon="icon-dollar-sign">
-            Inquiries
+        <x-panel.nav-link :href="route('admin.distributor-orders.index')" :active="request()->routeIs('admin.distributor-orders.*')" icon="icon-package">
+            Distributor Orders
         </x-panel.nav-link>
     </x-panel.nav-section>
 

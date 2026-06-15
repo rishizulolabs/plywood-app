@@ -4,7 +4,6 @@ namespace App\Filament\Widgets;
 
 use App\Models\Category;
 use App\Models\DistributorProfile;
-use App\Models\Inquiry;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\User;
@@ -22,11 +21,6 @@ class AdminStatsWidget extends Widget
 
     protected function getViewData(): array
     {
-        $inquiriesThisMonth = Inquiry::query()
-            ->whereMonth('created_at', now()->month)
-            ->whereYear('created_at', now()->year)
-            ->count();
-
         $ordersThisMonth = Order::query()
             ->whereMonth('created_at', now()->month)
             ->whereYear('created_at', now()->year)
@@ -65,16 +59,9 @@ class AdminStatsWidget extends Widget
                     'icon' => 'icon-database',
                 ],
                 [
-                    'label' => 'Inquiries (month)',
-                    'value' => $inquiriesThisMonth,
-                    'desc' => 'Quote requests this month',
-                    'color' => 'amber',
-                    'icon' => 'icon-file-text',
-                ],
-                [
                     'label' => 'Orders (month)',
                     'value' => $ordersThisMonth,
-                    'desc' => 'Confirmed orders this month',
+                    'desc' => 'Orders placed this month',
                     'color' => 'green',
                     'icon' => 'icon-check-circle',
                 ],

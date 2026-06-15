@@ -51,7 +51,7 @@ class OrderController extends Controller
             ],
         ];
 
-        return view('admin.orders.index', compact('orders', 'stats'));
+        return view('admin.orders.customers', compact('orders', 'stats'));
     }
 
     public function store(Request $request): RedirectResponse
@@ -101,7 +101,7 @@ class OrderController extends Controller
         });
 
         return redirect()
-            ->route('admin.orders.index')
+            ->route('admin.customer-orders.index')
             ->with('success', 'Order added successfully.');
     }
 }

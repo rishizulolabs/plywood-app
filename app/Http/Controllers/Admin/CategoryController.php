@@ -24,8 +24,7 @@ class CategoryController extends Controller
                 $search = $filters['search'];
                 $query->where(function ($builder) use ($search) {
                     $builder->where('name', 'like', "%{$search}%")
-                        ->orWhere('slug', 'like', "%{$search}%")
-                        ->orWhere('description', 'like', "%{$search}%");
+                        ->orWhere('slug', 'like', "%{$search}%");
                 });
             })
             ->latest()
@@ -39,7 +38,6 @@ class CategoryController extends Controller
     {
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255', 'unique:categories,name'],
-            'description' => ['nullable', 'string', 'max:1000'],
         ]);
 
         Category::create($validated);
@@ -53,12 +51,10 @@ class CategoryController extends Controller
     {
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255', Rule::unique('categories', 'name')->ignore($category->id)],
-            'description' => ['nullable', 'string', 'max:1000'],
         ]);
 
         $category->update([
             'name' => $validated['name'],
-            'description' => $validated['description'],
             'slug' => Str::slug($validated['name']),
         ]);
 

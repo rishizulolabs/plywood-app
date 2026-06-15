@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Distributor;
 
+use App\Models\Product;
 use Illuminate\View\View;
 
 class DashboardController extends DistributorController
@@ -11,9 +12,11 @@ class DashboardController extends DistributorController
         $user = auth()->user();
         $profile = $user->distributorProfile;
 
-        $productCount = $profile?->products()->count() ?? 0;
-        $inquiryCount = $profile?->inquiries()->count() ?? 0;
+        $productCount = Product::query()->count();
         $orderCount = $profile?->orders()->count() ?? 0;
+        $processingCount = $profile?->orders()
+            ->where('fulfillment_status', 'processing')
+            ->count() ?? 0;
         $isApproved = (bool) ($profile?->is_approved);
 
         $stats = [
@@ -26,14 +29,6 @@ class DashboardController extends DistributorController
                 'href' => route('distributor.products.index'),
             ],
             [
-                'label' => 'Inquiries',
-                'value' => $inquiryCount,
-                'desc' => 'Customer quote requests',
-                'color' => 'amber',
-                'icon' => 'icon-file-text',
-                'href' => route('distributor.inquiries.index'),
-            ],
-            [
                 'label' => 'Active orders',
                 'value' => $orderCount,
                 'desc' => 'Orders to fulfill',
@@ -42,12 +37,20 @@ class DashboardController extends DistributorController
                 'href' => route('distributor.orders.index'),
             ],
             [
+                'label' => 'Processing',
+                'value' => $processingCount,
+                'desc' => 'Awaiting fulfillment',
+                'color' => 'amber',
+                'icon' => 'icon-activity',
+                'href' => route('distributor.orders.index'),
+            ],
+            [
                 'label' => 'Approval',
                 'value' => $isApproved ? 'Approved' : 'Pending',
                 'desc' => $isApproved ? 'Account is active' : 'Awaiting admin review',
                 'color' => $isApproved ? 'green' : 'amber',
                 'icon' => 'icon-check-circle',
-                'href' => route('profile.edit'),
+                'href' => route('distributor.dashboard'),
             ],
         ];
 
@@ -60,13 +63,6 @@ class DashboardController extends DistributorController
                 'color' => 'blue',
             ],
             [
-                'title' => 'View inquiries',
-                'desc' => 'Respond to customer quote requests',
-                'icon' => 'icon-file-text',
-                'href' => route('distributor.inquiries.index'),
-                'color' => 'amber',
-            ],
-            [
                 'title' => 'Track orders',
                 'desc' => 'Monitor payment and fulfillment',
                 'icon' => 'icon-package',
@@ -74,10 +70,10 @@ class DashboardController extends DistributorController
                 'color' => 'green',
             ],
             [
-                'title' => 'Business profile',
-                'desc' => 'Update GST, cities and bank details',
-                'icon' => 'icon-user',
-                'href' => route('profile.edit'),
+                'title' => 'Purchase orders',
+                'desc' => 'View restock requests placed with admin',
+                'icon' => 'icon-file-text',
+                'href' => route('distributor.purchase-orders.index'),
                 'color' => 'purple',
             ],
         ];

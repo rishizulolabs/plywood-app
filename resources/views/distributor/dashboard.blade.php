@@ -2,7 +2,7 @@
 
 @section('title', 'Overview')
 @section('page-title', 'Overview')
-@section('page-subtitle', 'Manage products, inquiries, and orders')
+@section('page-subtitle', 'Manage products and orders')
 
 @section('content')
 <div class="portal-dashboard-page">
@@ -29,9 +29,9 @@
                     <h2 class="portal-welcome-title">{{ $profile?->business_name ?? 'Your business' }}</h2>
                     <p class="portal-welcome-text">
                         @if($isApproved)
-                            Manage your plywood catalog, send custom quotes, and fulfill customer orders from one place.
+                            Manage your plywood catalog and fulfill customer orders from one place.
                         @else
-                            Your account is pending approval. Complete your profile while the admin team reviews your application.
+                            Your account is pending approval. The admin team is reviewing your application.
                         @endif
                     </p>
                 </div>
@@ -61,7 +61,7 @@
             @unless($isApproved)
                 <div class="alert alert-warning portal-approval-alert" role="alert">
                     <svg class="alert-icon" aria-hidden="true"><use href="#icon-alert-triangle"></use></svg>
-                    <p class="alert-message">You cannot list products or receive inquiries until your account is approved.</p>
+                    <p class="alert-message">You cannot list products or receive orders until your account is approved.</p>
                 </div>
             @endunless
 
@@ -70,7 +70,7 @@
                     <svg class="btn-icon-svg" aria-hidden="true"><use href="#icon-database"></use></svg>
                     <span>My products</span>
                 </a>
-                <a href="{{ route('profile.edit') }}" class="btn-modal">Business profile</a>
+                <a href="{{ route('distributor.orders.index') }}" class="btn-modal">Customer orders</a>
             </div>
         </div>
 

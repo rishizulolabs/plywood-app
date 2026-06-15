@@ -39,7 +39,7 @@
     @endif
 </form>
 
-<div class="content-card space-y">
+<div class="content-card">
     <div class="content-card-header">
         <p class="content-card-title">Distributors</p>
         <span class="badge badge-gray">{{ $distributors->total() }} total</span>
@@ -48,7 +48,8 @@
     @if($distributors->isEmpty())
         <x-admin.empty-state :message="$hasActiveFilters ? 'No distributors match your search. Try different filters or clear search.' : 'No distributors found. Click Add Distributor to create one.'" />
     @else
-        <table class="data-table">
+        <div class="table-responsive table-responsive--wide">
+        <table class="data-table data-table-distributors">
             <thead>
                 <tr>
                     <th>Name</th>
@@ -62,13 +63,19 @@
             </thead>
             <tbody>
                 @foreach ($distributors as $distributor)
-                    <tr>
+                    <tr
+                        class="distributor-row-clickable"
+                        data-distributor='@json($distributor->toDetailPayload())'
+                        tabindex="0"
+                        role="button"
+                        aria-label="View details for {{ $distributor->user?->name ?? $distributor->business_name ?? 'distributor' }}"
+                    >
                         <td>{{ $distributor->user?->name ?? $distributor->business_name ?? '—' }}</td>
-                        <td>{{ $distributor->user?->email ?? '—' }}</td>
-                        <td>{{ $distributor->user?->phone ?? '—' }}</td>
+                        <td class="cell-truncate" title="{{ $distributor->user?->email ?? '' }}">{{ $distributor->user?->email ?? '—' }}</td>
+                        <td class="cell-nowrap">{{ $distributor->user?->phone ?? '—' }}</td>
                         <td>{{ $distributor->user?->city ?? ($distributor->service_cities[0] ?? '—') }}</td>
                         <td>
-                            <div class="status-dropdown">
+                            <div class="status-dropdown" data-stop-row-click>
                                 <button
                                     type="button"
                                     class="status-dropdown-trigger status-btn {{ $distributor->is_approved ? 'status-btn-approved is-active' : 'status-btn-pending is-active' }}"
@@ -108,7 +115,15 @@
                         </td>
                         <td>{{ $distributor->created_at?->format('d M Y') ?? '—' }}</td>
                         <td>
-                            <div class="table-actions">
+                            <div class="table-actions" data-stop-row-click>
+                                <button
+                                    type="button"
+                                    class="btn-action btn-action-view btn-quick-view"
+                                    title="View details"
+                                    data-distributor='@json($distributor->toDetailPayload())'
+                                >
+                                    <svg class="btn-icon-svg" aria-hidden="true"><use href="#icon-eye"></use></svg>
+                                </button>
                                 <button
                                     type="button"
                                     class="btn-action btn-action-edit btn-quick-edit"
@@ -118,6 +133,7 @@
                                     data-location="{{ $distributor->user?->city ?? ($distributor->service_cities[0] ?? '') }}"
                                     data-status="{{ $distributor->is_approved ? 'approved' : 'not_approved' }}"
                                     data-action="{{ route('admin.distributors.update', $distributor) }}"
+                                    data-offered-products='@json($distributor->offeredProductPriceMap())'
                                 >
                                     <svg class="btn-icon-svg" aria-hidden="true"><use href="#icon-edit"></use></svg>
                                 </button>
@@ -139,6 +155,7 @@
                 @endforeach
             </tbody>
         </table>
+        </div>
         <x-admin.pagination :paginator="$distributors" />
     @endif
 </div>
@@ -152,7 +169,7 @@
     aria-labelledby="modal-title"
     aria-hidden="true"
 >
-    <div class="modal-dialog" style="max-width: 32rem;">
+    <div class="modal-dialog modal-dialog-wide">
         <div class="modal-header">
             <h2 class="modal-title" id="modal-title">Add Distributor</h2>
             <button type="button" class="btn-close-modal" id="btn-close-add-distributor" aria-label="Close">
@@ -165,7 +182,6 @@
                 id="add-distributor-form"
                 method="POST"
                 action="{{ route('admin.distributors.store') }}"
-                enctype="multipart/form-data"
             >
                 @csrf
 
@@ -250,20 +266,7 @@
                     @enderror
                 </div>
 
-                <div class="form-group">
-                    <label class="form-label" for="distributor-image">Image</label>
-                    <input
-                        type="file"
-                        id="distributor-image"
-                        name="image"
-                        class="form-input @error('image') form-input-error @enderror"
-                        accept="image/*"
-                    >
-                    <p class="form-helper">JPG, PNG or WEBP up to 2MB</p>
-                    @error('image')
-                        <p class="form-helper form-helper-error">{{ $message }}</p>
-                    @enderror
-                </div>
+                @include('admin.distributors._product-pricing-fields', ['idPrefix' => 'add_'])
             </form>
         </div>
         <div class="modal-footer">
@@ -282,9 +285,9 @@
     aria-labelledby="edit-modal-title"
     aria-hidden="true"
 >
-    <div class="modal-dialog" style="max-width: 28rem;">
+    <div class="modal-dialog modal-dialog-wide">
         <div class="modal-header">
-            <h2 class="modal-title" id="edit-modal-title">Quick Edit</h2>
+            <h2 class="modal-title" id="edit-modal-title">Edit Distributor</h2>
             <button type="button" class="btn-close-modal" id="btn-close-edit-distributor" aria-label="Close">
                 <svg class="icon-svg" aria-hidden="true"><use href="#icon-x"></use></svg>
             </button>
@@ -316,12 +319,53 @@
                         <option value="not_approved">Not approved</option>
                     </select>
                 </div>
+
+                @php
+                    $editSelectedProducts = [];
+                    if (old('_method') === 'PUT' && old('_edit_distributor_id')) {
+                        $editDistributor = \App\Models\DistributorProfile::with('offeredProducts')
+                            ->find(old('_edit_distributor_id'));
+                        $existingPrices = $editDistributor?->offeredProductPriceMap() ?? [];
+
+                        foreach (old('products', []) as $productId) {
+                            $editSelectedProducts[$productId] = old(
+                                'prices.'.$productId,
+                                $existingPrices[(string) $productId] ?? $existingPrices[$productId] ?? ''
+                            );
+                        }
+                    }
+                @endphp
+                @include('admin.distributors._product-pricing-fields', [
+                    'idPrefix' => 'edit_',
+                    'selectedProducts' => $editSelectedProducts,
+                ])
+                <input type="hidden" name="_edit_distributor_id" id="edit-distributor-id" value="{{ old('_edit_distributor_id') }}">
             </form>
         </div>
         <div class="modal-footer">
             <button type="button" class="btn-cancel" id="btn-cancel-edit-distributor">Cancel</button>
             <button type="submit" form="edit-distributor-form" class="btn-submit">Save changes</button>
         </div>
+    </div>
+</div>
+
+<div class="modal-backdrop" id="view-distributor-modal-backdrop" aria-hidden="true"></div>
+<div
+    class="modal"
+    id="view-distributor-modal"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="view-distributor-modal-title"
+    aria-hidden="true"
+>
+    <div class="modal-dialog modal-dialog-wide">
+        <div class="modal-header">
+            <h2 class="modal-title" id="view-distributor-modal-title">Distributor details</h2>
+            <button type="button" class="btn-close-modal" id="btn-close-view-distributor" aria-label="Close">
+                <svg class="icon-svg" aria-hidden="true"><use href="#icon-x"></use></svg>
+            </button>
+        </div>
+        <div class="modal-body" id="view-distributor-content"></div>
     </div>
 </div>
 @endsection
@@ -363,25 +407,256 @@
 
     var addModal = bindModal('modal-backdrop', 'add-distributor-modal', 'btn-open-add-distributor', 'btn-close-add-distributor', 'btn-cancel-add-distributor');
     var editModal = bindModal('edit-modal-backdrop', 'edit-distributor-modal', null, 'btn-close-edit-distributor', 'btn-cancel-edit-distributor');
+    var viewModal = bindModal('view-distributor-modal-backdrop', 'view-distributor-modal', null, 'btn-close-view-distributor', null);
+
+    function detailRow(label, value) {
+        var display = (value === null || value === undefined || value === '') ? '—' : value;
+        return '<div class="product-spec-item"><dt>' + label + '</dt><dd>' + display + '</dd></div>';
+    }
+
+    function renderDistributorDetail(data) {
+        var statusBadge = data.is_approved
+            ? '<span class="badge badge-green">Approved</span>'
+            : '<span class="badge badge-yellow">Not approved</span>';
+
+        var productsHtml = '';
+        if (Array.isArray(data.offered_products) && data.offered_products.length) {
+            productsHtml = '<div class="distributor-commercial-products">' +
+                '<p class="form-section-title">Products &amp; pricing</p>' +
+                '<table class="data-table distributor-commercial-table">' +
+                '<thead><tr><th>Product</th><th>Category</th><th>Grade</th><th>Size</th><th>Qty</th><th>Price</th></tr></thead><tbody>';
+
+            data.offered_products.forEach(function (product) {
+                productsHtml += '<tr>' +
+                    '<td>' + (product.name || '—') + '</td>' +
+                    '<td>' + (product.category || '—') + '</td>' +
+                    '<td>' + (product.grade || '—') + '</td>' +
+                    '<td>' + (product.size || '—') + '</td>' +
+                    '<td>' + (product.stock_quantity !== null && product.stock_quantity !== undefined ? product.stock_quantity : '—') + '</td>' +
+                    '<td class="cell-nowrap">' + (product.price || '—') + '</td>' +
+                    '</tr>';
+            });
+
+            productsHtml += '</tbody></table></div>';
+        } else {
+            productsHtml = '<div class="distributor-commercial-products">' +
+                '<p class="form-section-title">Products &amp; pricing</p>' +
+                '<p class="form-helper">No products configured for this distributor.</p></div>';
+        }
+
+        return '<div class="distributor-commercial-view">' +
+            '<div class="form-section">' +
+                '<p class="form-section-title">Contact</p>' +
+                '<dl class="product-spec-list">' +
+                    detailRow('Name', data.name) +
+                    detailRow('Email', data.email) +
+                    detailRow('Phone', data.phone) +
+                    detailRow('Location', data.location) +
+                    detailRow('Status', statusBadge) +
+                    detailRow('Registered', data.registered) +
+                '</dl>' +
+            '</div>' +
+            '<div class="form-section">' +
+                '<p class="form-section-title">Products</p>' +
+                '<dl class="product-spec-list">' +
+                    detailRow('Total qty', data.total_stock_quantity) +
+                    detailRow('Allotted products', data.allotted_products_count) +
+                '</dl>' +
+            '</div>' +
+            productsHtml +
+        '</div>';
+    }
+
+    function openDistributorDetail(data) {
+        var wrap = document.getElementById('view-distributor-content');
+        var title = document.getElementById('view-distributor-modal-title');
+        if (!wrap || !viewModal) return;
+
+        if (title) {
+            title.textContent = data.name ? data.name + ' — Details' : 'Distributor details';
+        }
+
+        wrap.innerHTML = renderDistributorDetail(data);
+        viewModal.openModal();
+    }
+
+    function parseDistributorRow(row) {
+        try {
+            return JSON.parse(row.getAttribute('data-distributor') || '{}');
+        } catch (error) {
+            return {};
+        }
+    }
+
+    document.querySelectorAll('.distributor-row-clickable').forEach(function (row) {
+        row.addEventListener('click', function (event) {
+            if (event.target.closest('[data-stop-row-click]')) {
+                return;
+            }
+
+            openDistributorDetail(parseDistributorRow(row));
+        });
+
+        row.addEventListener('keydown', function (event) {
+            if (event.key !== 'Enter' && event.key !== ' ') {
+                return;
+            }
+
+            event.preventDefault();
+            openDistributorDetail(parseDistributorRow(row));
+        });
+    });
+
+    function offeredPrice(offered, productId) {
+        if (!offered || typeof offered !== 'object') {
+            return null;
+        }
+
+        var key = String(productId);
+
+        if (Object.prototype.hasOwnProperty.call(offered, key)) {
+            return offered[key];
+        }
+
+        var numericKey = Number(productId);
+        if (Object.prototype.hasOwnProperty.call(offered, numericKey)) {
+            return offered[numericKey];
+        }
+
+        return null;
+    }
+
+    function hasOfferedProduct(offered, productId) {
+        return offeredPrice(offered, productId) !== null;
+    }
+
+    function formatPriceInputValue(price) {
+        if (price === null || price === undefined || price === '') {
+            return '';
+        }
+
+        var numericPrice = Number(price);
+        return Number.isFinite(numericPrice) ? String(numericPrice) : String(price);
+    }
+
+    function populateDistributorProducts(form, offered) {
+        form.querySelectorAll('.distributor-product-row').forEach(function (row) {
+            var checkbox = row.querySelector('.distributor-product-check');
+            var priceInput = row.querySelector('.distributor-product-price');
+            var priceHint = row.querySelector('.distributor-current-price');
+            if (!checkbox || !priceInput) return;
+
+            var productId = checkbox.value;
+            var price = offeredPrice(offered, productId);
+            var isSelected = hasOfferedProduct(offered, productId);
+
+            checkbox.checked = isSelected;
+            priceInput.value = isSelected ? formatPriceInputValue(price) : '';
+            priceInput.disabled = !isSelected;
+
+            if (priceHint) {
+                if (isSelected && priceInput.value !== '') {
+                    priceHint.textContent = 'Current price: ₹' + Number(priceInput.value).toLocaleString('en-IN');
+                    priceHint.hidden = false;
+                } else {
+                    priceHint.textContent = '';
+                    priceHint.hidden = true;
+                }
+            }
+        });
+    }
+
+    document.querySelectorAll('.btn-quick-view').forEach(function (btn) {
+        btn.addEventListener('click', function (event) {
+            event.preventDefault();
+            event.stopPropagation();
+
+            var raw = btn.getAttribute('data-distributor');
+            if (!raw) {
+                var row = btn.closest('.distributor-row-clickable');
+                raw = row ? row.getAttribute('data-distributor') : null;
+            }
+
+            if (!raw) {
+                return;
+            }
+
+            try {
+                openDistributorDetail(JSON.parse(raw));
+            } catch (error) {
+                openDistributorDetail({});
+            }
+        });
+    });
 
     document.querySelectorAll('.btn-quick-edit').forEach(function (btn) {
-        btn.addEventListener('click', function () {
+        btn.addEventListener('click', function (event) {
+            event.preventDefault();
+            event.stopPropagation();
+
             var form = document.getElementById('edit-distributor-form');
             if (!form || !editModal) return;
 
-            form.action = btn.getAttribute('data-action');
+            form.action = btn.getAttribute('data-action') || '';
             document.getElementById('edit-distributor-name').value = btn.getAttribute('data-name') || '';
             document.getElementById('edit-distributor-phone').value = btn.getAttribute('data-phone') || '';
             document.getElementById('edit-distributor-location').value = btn.getAttribute('data-location') || '';
             document.getElementById('edit-distributor-status').value = btn.getAttribute('data-status') || 'not_approved';
 
+            var editIdInput = document.getElementById('edit-distributor-id');
+            var actionMatch = (form.action || '').match(/\/distributors\/(\d+)\/?$/);
+            if (editIdInput && actionMatch) {
+                editIdInput.value = actionMatch[1];
+            }
+
+            var offered = {};
+            try {
+                offered = JSON.parse(btn.getAttribute('data-offered-products') || '{}');
+            } catch (error) {
+                offered = {};
+            }
+
+            populateDistributorProducts(form, offered);
             editModal.openModal();
         });
     });
 
     @if($errors->any() && old('name') && !old('_method'))
         if (addModal) addModal.openModal();
+    @elseif($errors->any() && old('_method') === 'PUT' && old('_edit_distributor_id'))
+        (function () {
+            var form = document.getElementById('edit-distributor-form');
+            if (form) {
+                form.action = @json(route('admin.distributors.update', old('_edit_distributor_id')));
+            }
+            if (editModal) editModal.openModal();
+        })();
     @endif
+
+    document.querySelectorAll('.distributor-product-check').forEach(function (checkbox) {
+        var row = checkbox.closest('.distributor-product-row');
+        var priceInput = row ? row.querySelector('.distributor-product-price') : null;
+        if (!priceInput) return;
+
+        function syncPriceField() {
+            priceInput.disabled = !checkbox.checked;
+            var priceHint = row ? row.querySelector('.distributor-current-price') : null;
+
+            if (!checkbox.checked) {
+                priceInput.value = '';
+                if (priceHint) {
+                    priceHint.textContent = '';
+                    priceHint.hidden = true;
+                }
+            } else if (priceInput.value !== '' && priceHint) {
+                priceHint.textContent = 'Current price: ₹' + Number(priceInput.value).toLocaleString('en-IN');
+                priceHint.hidden = false;
+            }
+        }
+
+        checkbox.addEventListener('change', syncPriceField);
+        syncPriceField();
+    });
 })();
 
 (function () {

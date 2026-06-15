@@ -6,16 +6,16 @@
         </div>
         <div class="content-card-body">
             <p style="margin: 0 0 1.5rem; font-size: 0.875rem; color: #6b7280; line-height: 1.6;">
-                Manage your B2B plywood marketplace — distributors, customers, products, inquiries, and orders.
+                Manage your B2B plywood marketplace — distributors, customers, products, and orders.
             </p>
             <div class="info-grid">
                 <div class="info-tile">
                     <p class="info-tile-label">Workflow</p>
-                    <p class="info-tile-value">Customer inquiry → Distributor quote → Order</p>
+                    <p class="info-tile-value">Customer cart → Order → Fulfillment</p>
                 </div>
                 <div class="info-tile">
                     <p class="info-tile-label">Pricing</p>
-                    <p class="info-tile-value">No public prices — quotes only</p>
+                    <p class="info-tile-value">Distributor-specific pricing on checkout</p>
                 </div>
                 <div class="info-tile">
                     <p class="info-tile-label">Database</p>

@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Customer;
 
 use App\Models\Category;
 use App\Models\Product;
+use App\Support\CustomerCart;
+use App\Support\InquiryDistributorResolver;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -16,8 +18,8 @@ class CatalogController extends CustomerController
         $categoryId = $request->query('category');
 
         $products = Product::query()
-            ->with(['category', 'distributorProfile'])
-            ->whereHas('distributorProfile', fn ($query) => $query->where('is_approved', true))
+            ->assignedToDistributor()
+            ->with(['category', 'media'])
             ->when($search !== '', function ($query) use ($search) {
                 $query->where(function ($inner) use ($search) {
                     $inner->where('name', 'like', "%{$search}%")
@@ -33,47 +35,44 @@ class CatalogController extends CustomerController
             ->withQueryString();
 
         $categories = Category::query()
-            ->whereHas('products', function ($query) {
-                $query->whereHas('distributorProfile', fn ($distributorQuery) => $distributorQuery->where('is_approved', true));
-            })
+            ->whereHas('products', fn ($query) => $query->assignedToDistributor())
             ->orderBy('name')
             ->get();
 
         return view('customer.catalog.index', compact('products', 'categories', 'search', 'categoryId'));
     }
 
+    public function show(Product $product): View
+    {
+        abort_unless($product->isAssignedToDistributor(), 404);
+
+        $product->load(['category', 'media', 'distributorProfile']);
+
+        return view('customer.catalog.show', compact('product'));
+    }
+
     public function addToCart(Request $request, Product $product): RedirectResponse
     {
+        abort_unless($product->isAssignedToDistributor(), 404);
+
         $validated = $request->validate([
             'quantity' => ['required', 'integer', 'min:1'],
         ]);
 
         $product->load('distributorProfile');
 
-        if (! $product->distributorProfile?->is_approved) {
-            return back()->with('error', 'This product is not available.');
+        $distributor = InquiryDistributorResolver::forProduct($product, $request->user());
+
+        if (! $distributor) {
+            return redirect()
+                ->route('customer.catalog.index')
+                ->with('error', "No distributor is available for {$product->name}.");
         }
 
-        $cart = session('inquiry_cart', []);
-
-        $existingIndex = collect($cart)->search(fn ($item) => ($item['product_id'] ?? null) === $product->id);
-
-        if ($existingIndex !== false) {
-            $cart[$existingIndex]['quantity'] = ($cart[$existingIndex]['quantity'] ?? 0) + $validated['quantity'];
-        } else {
-            $cart[] = [
-                'product_id' => $product->id,
-                'product_name' => $product->name,
-                'quantity' => $validated['quantity'],
-                'distributor' => $product->distributorProfile?->business_name,
-                'notes' => null,
-            ];
-        }
-
-        session(['inquiry_cart' => $cart]);
+        CustomerCart::add($request->user(), $product, $validated['quantity'], $distributor);
 
         return redirect()
-            ->route('customer.inquiry-cart.index')
-            ->with('success', "{$product->name} added to your inquiry cart.");
+            ->route('customer.cart.index')
+            ->with('success', "{$product->name} added to your cart.");
     }
 }

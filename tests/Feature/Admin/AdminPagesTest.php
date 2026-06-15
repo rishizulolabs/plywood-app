@@ -28,6 +28,8 @@ class AdminPagesTest extends TestCase
             route('admin.distributors.index'),
             route('admin.products.index'),
             route('admin.categories.index'),
+            route('admin.customer-orders.index'),
+            route('admin.distributor-orders.index'),
             route('admin.settings.index'),
         ];
 
@@ -266,15 +268,16 @@ class AdminPagesTest extends TestCase
         ]);
 
         $this->actingAs($admin)
-            ->get(route('admin.orders.index'))
+            ->get(route('admin.customer-orders.index'))
             ->assertOk()
+            ->assertSee('Customer Orders')
             ->assertSee('Total orders')
             ->assertSee('Completed')
             ->assertSee('Pending')
             ->assertDontSee('Add Order');
 
         $this->actingAs($admin)
-            ->post(route('admin.orders.store'), [
+            ->post(route('admin.customer-orders.store'), [
                 'customer_id' => $customer->id,
                 'distributor_profile_id' => $profile->id,
                 'product_id' => $product->id,
@@ -284,7 +287,7 @@ class AdminPagesTest extends TestCase
                 'payment_status' => 'pending',
                 'fulfillment_status' => 'processing',
             ])
-            ->assertRedirect(route('admin.orders.index'))
+            ->assertRedirect(route('admin.customer-orders.index'))
             ->assertSessionHas('success');
 
         $this->assertDatabaseHas('orders', [
@@ -406,6 +409,116 @@ class AdminPagesTest extends TestCase
             'business_name' => 'New Ply Co',
             'is_approved' => true,
         ]);
+    }
+
+    public function test_admin_can_view_distributor_commercial_details(): void
+    {
+        $admin = User::factory()->create();
+        $admin->assignRole('admin');
+
+        $distributorUser = User::factory()->create([
+            'name' => 'Commercial Dist',
+            'email' => 'commercial@plywood.com',
+            'phone' => '9123456789',
+            'city' => 'Delhi',
+        ]);
+        $distributorUser->assignRole('distributor');
+
+        $profile = \App\Models\DistributorProfile::create([
+            'user_id' => $distributorUser->id,
+            'business_name' => 'Commercial Dist',
+            'gst_number' => '29ABCDE1234F1Z5',
+            'service_cities' => ['Delhi', 'Noida'],
+            'is_approved' => true,
+        ]);
+
+        $category = \App\Models\Category::create(['name' => 'Commercial Ply', 'slug' => 'commercial-ply']);
+
+        $product = \App\Models\Product::create([
+            'distributor_profile_id' => $profile->id,
+            'category_id' => $category->id,
+            'name' => 'Commercial Ply 18mm',
+            'thickness' => '18mm',
+            'size' => '8ft x 4ft',
+            'grade' => 'BWP',
+        ]);
+
+        $profile->offeredProducts()->attach($product->id, ['price' => 5800, 'stock_quantity' => 25]);
+
+        $otherUser = User::factory()->create(['name' => 'Other Commercial Dist']);
+        $otherUser->assignRole('distributor');
+        \App\Models\DistributorProfile::create([
+            'user_id' => $otherUser->id,
+            'business_name' => 'Other Commercial Dist',
+            'is_approved' => true,
+        ]);
+
+        $response = $this->actingAs($admin)
+            ->get(route('admin.distributors.index', ['search' => 'Commercial Dist']));
+
+        $response->assertOk()
+            ->assertSee('Commercial Dist')
+            ->assertSee('Other Commercial Dist')
+            ->assertSee('commercial@plywood.com')
+            ->assertSee('Commercial Ply 18mm')
+            ->assertSee('btn-quick-view', false)
+            ->assertSee('Total qty', false)
+            ->assertSee('Allotted products', false)
+            ->assertSee("data-distributor='", false);
+
+        $html = $response->getContent();
+
+        preg_match_all("/data-distributor='([^']+)'/", $html, $matches);
+        $this->assertNotEmpty($matches[1] ?? []);
+
+        $payload = null;
+        foreach ($matches[1] as $encoded) {
+            $decoded = json_decode(html_entity_decode($encoded, ENT_QUOTES, 'UTF-8'), true);
+            if (is_array($decoded) && ($decoded['email'] ?? null) === 'commercial@plywood.com') {
+                $payload = $decoded;
+                break;
+            }
+        }
+
+        $this->assertNotNull($payload);
+        $this->assertSame('Commercial Dist', $payload['name'] ?? null);
+        $this->assertSame(1, $payload['allotted_products_count'] ?? null);
+        $this->assertSame(25, $payload['total_stock_quantity'] ?? null);
+        $this->assertSame(25, $payload['offered_products'][0]['stock_quantity'] ?? null);
+        $response->assertSee('>Qty</th>', false);
+    }
+
+    public function test_admin_edit_distributor_includes_existing_product_prices(): void
+    {
+        $admin = User::factory()->create();
+        $admin->assignRole('admin');
+
+        $distributorUser = User::factory()->create(['name' => 'Priced Dist']);
+        $distributorUser->assignRole('distributor');
+
+        $profile = \App\Models\DistributorProfile::create([
+            'user_id' => $distributorUser->id,
+            'business_name' => 'Priced Dist',
+            'is_approved' => true,
+        ]);
+
+        $category = \App\Models\Category::create(['name' => 'Priced Ply', 'slug' => 'priced-ply']);
+
+        $product = \App\Models\Product::create([
+            'distributor_profile_id' => null,
+            'category_id' => $category->id,
+            'name' => 'Priced Ply 12mm',
+            'thickness' => '12mm',
+            'size' => '8ft x 4ft',
+            'grade' => 'BWR',
+        ]);
+
+        $profile->offeredProducts()->attach($product->id, ['price' => 7250.50]);
+
+        $this->actingAs($admin)
+            ->get(route('admin.distributors.index'))
+            ->assertOk()
+            ->assertSee('data-offered-products='.'\''.'{"'.'"'.$product->id.'"'.':7250.5}', false);
     }
 
     public function test_admin_can_quick_edit_distributor_status(): void

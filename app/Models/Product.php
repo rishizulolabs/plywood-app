@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
@@ -43,7 +44,12 @@ class Product extends Model implements HasMedia
 
     public function registerMediaCollections(): void
     {
-        $this->addMediaCollection('images');
+        $this->addMediaCollection('product_image')
+            ->singleFile()
+            ->acceptsMimeTypes(['image/jpeg', 'image/png', 'image/webp', 'image/gif']);
+
+        $this->addMediaCollection('thumbnails')
+            ->acceptsMimeTypes(['image/jpeg', 'image/png', 'image/webp', 'image/gif']);
     }
 
     public function category(): BelongsTo
@@ -54,6 +60,25 @@ class Product extends Model implements HasMedia
     public function distributorProfile(): BelongsTo
     {
         return $this->belongsTo(DistributorProfile::class);
+    }
+
+    public function distributors(): BelongsToMany
+    {
+        return $this->belongsToMany(DistributorProfile::class, 'distributor_product')
+            ->withPivot('price', 'stock_quantity')
+            ->withTimestamps();
+    }
+
+    public function scopeAssignedToDistributor($query): void
+    {
+        $query->whereHas('distributors', fn ($distributorQuery) => $distributorQuery->where('is_approved', true));
+    }
+
+    public function isAssignedToDistributor(): bool
+    {
+        return $this->distributors()
+            ->where('is_approved', true)
+            ->exists();
     }
 
     public function inquiryItems(): HasMany

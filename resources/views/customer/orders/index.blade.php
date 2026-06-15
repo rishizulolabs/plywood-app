@@ -2,7 +2,7 @@
 
 @section('title', 'Orders')
 @section('page-title', 'Orders')
-@section('page-subtitle', 'Confirmed orders from accepted quotes')
+@section('page-subtitle', 'Orders placed from your cart')
 
 @section('content')
 <div class="stat-cards">
@@ -26,7 +26,7 @@
     </div>
 
     @if($orders->isEmpty())
-        <x-admin.empty-state message="No orders yet. Accept a distributor quote to confirm an order." />
+        <x-admin.empty-state message="No orders yet. Add products to your cart and click Proceed to place an order." />
     @else
         <table class="data-table">
             <thead>
