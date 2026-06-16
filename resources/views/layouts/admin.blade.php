@@ -43,4 +43,10 @@
         </x-panel.nav-link>
     </x-panel.nav-section>
 
+    <x-panel.nav-section title="Reports" icon="icon-activity">
+        <x-panel.nav-link :href="route('admin.analytics.index')" :active="request()->routeIs('admin.analytics.*')" icon="icon-activity">
+            Analytics
+        </x-panel.nav-link>
+    </x-panel.nav-section>
+
 @endsection

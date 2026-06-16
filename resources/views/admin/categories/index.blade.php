@@ -48,54 +48,46 @@
     @if($categories->isEmpty())
         <x-admin.empty-state :message="$hasActiveFilters ? 'No categories match your search. Try different keywords or clear search.' : 'No categories found. Click Add Category to create one.'" />
     @else
-        <table class="data-table">
-            <thead>
-                <tr>
-                    <th>Name</th>
-                    <th class="th-actions">Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach ($categories as $category)
-                    <tr>
-                        <td>{{ $category->name }}</td>
-                        <td>
-                            <div class="table-actions">
-                                <button
-                                    type="button"
-                                    class="btn-action btn-action-edit btn-quick-edit"
-                                    title="Quick edit"
-                                    data-name="{{ $category->name }}"
-                                    data-action="{{ route('admin.categories.update', $category) }}"
-                                >
-                                    <svg class="btn-icon-svg" aria-hidden="true"><use href="#icon-edit"></use></svg>
-                                </button>
-                                <form
-                                    method="POST"
-                                    action="{{ route('admin.categories.destroy', $category) }}"
-                                    class="table-action-form"
-                                    onsubmit="return confirm('Delete this category? This cannot be undone.');"
-                                >
-                                    @csrf
-                                    @method('DELETE')
-                                    @if($hasActiveFilters)
-                                        <input type="hidden" name="search" value="{{ $filters['search'] }}">
-                                    @endif
-                                    <button
-                                        type="submit"
-                                        class="btn-action btn-action-delete"
-                                        title="Delete"
-                                        @disabled($category->products_count > 0)
-                                    >
-                                        <svg class="btn-icon-svg" aria-hidden="true"><use href="#icon-trash"></use></svg>
-                                    </button>
-                                </form>
-                            </div>
-                        </td>
-                    </tr>
-                @endforeach
-            </tbody>
-        </table>
+        <ul class="category-list">
+            @foreach ($categories as $category)
+                <li class="category-list-item">
+                    <div class="category-list-body">
+                        <span class="category-list-name">{{ $category->name }}</span>
+                    </div>
+                    <div class="table-actions">
+                        <button
+                            type="button"
+                            class="btn-action btn-action-edit btn-quick-edit"
+                            title="Quick edit"
+                            data-name="{{ $category->name }}"
+                            data-action="{{ route('admin.categories.update', $category) }}"
+                        >
+                            <svg class="btn-icon-svg" aria-hidden="true"><use href="#icon-edit"></use></svg>
+                        </button>
+                        <form
+                            method="POST"
+                            action="{{ route('admin.categories.destroy', $category) }}"
+                            class="table-action-form"
+                            onsubmit="return confirm('Delete this category? This cannot be undone.');"
+                        >
+                            @csrf
+                            @method('DELETE')
+                            @if($hasActiveFilters)
+                                <input type="hidden" name="search" value="{{ $filters['search'] }}">
+                            @endif
+                            <button
+                                type="submit"
+                                class="btn-action btn-action-delete"
+                                title="Delete"
+                                @disabled($category->products_count > 0)
+                            >
+                                <svg class="btn-icon-svg" aria-hidden="true"><use href="#icon-trash"></use></svg>
+                            </button>
+                        </form>
+                    </div>
+                </li>
+            @endforeach
+        </ul>
         <x-admin.pagination :paginator="$categories" />
     @endif
 </div>

@@ -36,6 +36,7 @@
         @if($purchaseOrders->isEmpty())
             <x-admin.empty-state message="No purchase orders yet. Use Restock on the Products page to place an order with admin." />
         @else
+            <div class="table-responsive">
             <table class="data-table">
                 <thead>
                     <tr>
@@ -70,6 +71,7 @@
                     @endforeach
                 </tbody>
             </table>
+            </div>
             <x-admin.pagination :paginator="$purchaseOrders" />
         @endif
     </div>

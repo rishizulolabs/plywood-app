@@ -28,6 +28,7 @@
     @if($orders->isEmpty())
         <x-admin.empty-state message="No orders yet. Add products to your cart and click Proceed to place an order." />
     @else
+        <div class="table-responsive">
         <table class="data-table">
             <thead>
                 <tr>
@@ -64,6 +65,7 @@
                 @endforeach
             </tbody>
         </table>
+        </div>
         <x-admin.pagination :paginator="$orders" />
     @endif
 </div>

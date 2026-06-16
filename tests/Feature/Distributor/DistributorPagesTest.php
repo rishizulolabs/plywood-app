@@ -36,7 +36,7 @@ class DistributorPagesTest extends TestCase
         $this->actingAs($user)
             ->get(route('distributor.products.index'))
             ->assertOk()
-            ->assertSee('Assigned products');
+            ->assertSee('All products');
 
         $this->actingAs($user)
             ->get(route('distributor.orders.index'))
@@ -53,7 +53,7 @@ class DistributorPagesTest extends TestCase
             ->assertRedirect(route('distributor.dashboard'));
     }
 
-    public function test_distributor_products_page_shows_only_assigned_products(): void
+    public function test_distributor_products_page_shows_all_catalog_products_with_zero_stock_when_unassigned(): void
     {
         $user = $this->distributorUser();
         $profile = $user->distributorProfile;
@@ -80,20 +80,21 @@ class DistributorPagesTest extends TestCase
             'in_stock' => true,
         ]);
 
-        $profile->offeredProducts()->attach($assignedProduct->id, ['price' => 1500]);
+        $profile->offeredProducts()->attach($assignedProduct->id, ['price' => 1500, 'stock_quantity' => 8]);
 
-        $this->actingAs($user)
-            ->get(route('distributor.products.index'))
-            ->assertOk()
-            ->assertSee('Assigned products')
+        $response = $this->actingAs($user)
+            ->get(route('distributor.products.index'));
+
+        $response->assertOk()
+            ->assertSee('All products')
             ->assertSee('Assigned Catalog Ply')
+            ->assertSee('Unassigned Catalog Ply')
             ->assertSee('CenturyPly')
             ->assertSee('₹1,500.00')
             ->assertSee('Total quantity')
             ->assertSee('Customer order')
             ->assertSee('Balance')
-            ->assertSee('Restock')
-            ->assertDontSee('Unassigned Catalog Ply');
+            ->assertSee('Restock');
     }
 
     public function test_distributor_can_place_restock_order_to_admin(): void
@@ -165,7 +166,7 @@ class DistributorPagesTest extends TestCase
         $this->assertEquals('approved', $restockRequest->fresh()->status);
     }
 
-    public function test_distributor_products_only_show_own_assignments(): void
+    public function test_distributor_products_show_unassigned_catalog_items_with_zero_quantity(): void
     {
         $user = $this->distributorUser();
         $profile = $user->distributorProfile;
@@ -196,14 +197,49 @@ class DistributorPagesTest extends TestCase
             'grade' => 'MR',
         ]);
 
-        $profile->offeredProducts()->attach($ownAssignedProduct->id, ['price' => 1200]);
-        $otherProfile->offeredProducts()->attach($otherAssignedProduct->id, ['price' => 900]);
+        $profile->offeredProducts()->attach($ownAssignedProduct->id, ['price' => 1200, 'stock_quantity' => 5]);
+        $otherProfile->offeredProducts()->attach($otherAssignedProduct->id, ['price' => 900, 'stock_quantity' => 12]);
 
         $this->actingAs($user)
             ->get(route('distributor.products.index'))
             ->assertOk()
             ->assertSee('Own Assigned Ply')
-            ->assertDontSee('Other Assigned Ply');
+            ->assertSee('Other Assigned Ply');
+    }
+
+    public function test_distributor_can_restock_unassigned_catalog_product(): void
+    {
+        $user = $this->distributorUser();
+        $profile = $user->distributorProfile;
+
+        $product = Product::create([
+            'distributor_profile_id' => null,
+            'category_id' => Category::first()->id,
+            'name' => 'Unassigned Restock Ply',
+            'brand' => 'CenturyPly',
+            'thickness' => '12mm',
+            'size' => '8ft x 4ft',
+            'grade' => 'BWR',
+        ]);
+
+        $this->actingAs($user)
+            ->post(route('distributor.products.restock', $product), ['quantity' => 4])
+            ->assertRedirect(route('distributor.purchase-orders.index'))
+            ->assertSessionHas('success');
+
+        $this->assertDatabaseHas('distributor_product', [
+            'distributor_profile_id' => $profile->id,
+            'product_id' => $product->id,
+            'price' => 0,
+            'stock_quantity' => 4,
+        ]);
+
+        $this->assertDatabaseHas('restock_requests', [
+            'distributor_profile_id' => $profile->id,
+            'product_id' => $product->id,
+            'quantity' => 4,
+            'status' => 'pending',
+        ]);
     }
 
     public function test_distributor_can_update_order_status(): void

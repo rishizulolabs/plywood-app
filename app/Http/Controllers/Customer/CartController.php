@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Customer;
 
+use App\Models\CartItem;
 use App\Models\Inquiry;
 use App\Models\InquiryItem;
 use App\Models\Order;
@@ -31,6 +32,34 @@ class CartController extends CustomerController
         return redirect()
             ->route('customer.cart.index')
             ->with('success', "{$product->name} removed from your cart.");
+    }
+
+    public function update(Request $request, Product $product): RedirectResponse
+    {
+        $customer = $this->customer();
+
+        CartItem::query()
+            ->where('user_id', $customer->id)
+            ->where('product_id', $product->id)
+            ->firstOrFail();
+
+        $minQty = max(1, (int) ($product->min_order_qty ?? 1));
+
+        $validated = $request->validate([
+            'quantity' => ['required', 'integer', 'min:'.$minQty],
+            'notes' => ['nullable', 'string', 'max:1000'],
+        ]);
+
+        CustomerCart::update(
+            $customer,
+            $product,
+            $validated['quantity'],
+            $validated['notes'] ?? null,
+        );
+
+        return redirect()
+            ->route('customer.cart.index')
+            ->with('success', "{$product->name} updated in your cart.");
     }
 
     public function proceed(Request $request): RedirectResponse

@@ -48,17 +48,16 @@
     @if($products->isEmpty())
         <x-admin.empty-state :message="$hasActiveFilters ? 'No products match your search.' : 'No products found. Click Add Product to create one.'" />
     @else
-        <table class="data-table">
+        <div class="table-responsive table-responsive--products">
+        <table class="data-table data-table-products">
             <thead>
                 <tr>
                     <th class="th-image">Image</th>
                     <th>Name</th>
-                    <th>Brand</th>
                     <th>Thickness</th>
-                    <th>Size</th>
+                    <th class="th-size">Size</th>
                     <th>Grade</th>
                     <th>Category</th>
-                    <th>Stock</th>
                     <th class="th-actions">Actions</th>
                 </tr>
             </thead>
@@ -91,18 +90,10 @@
                                 {{ $product->name }}
                             </button>
                         </td>
-                        <td>{{ $product->brand ?? '—' }}</td>
                         <td>{{ $product->thickness ?? '—' }}</td>
-                        <td>{{ $product->size ?? '—' }}</td>
+                        <td class="td-size"><x-admin.size-cell :size="$product->size" /></td>
                         <td>{{ $product->grade ?? '—' }}</td>
                         <td>{{ $product->category?->name ?? '—' }}</td>
-                        <td>
-                            @if($product->in_stock)
-                                <span class="badge badge-green">In stock</span>
-                            @else
-                                <span class="badge badge-gray">Out of stock</span>
-                            @endif
-                        </td>
                         <td>
                             <div class="table-actions">
                                 <button
@@ -142,6 +133,7 @@
                 @endforeach
             </tbody>
         </table>
+        </div>
         <x-admin.pagination :paginator="$products" />
     @endif
 </div>

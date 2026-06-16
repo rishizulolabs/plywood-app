@@ -130,15 +130,68 @@ class CustomerPagesTest extends TestCase
             ->assertDontSee('Platform Ply 16mm');
     }
 
-    public function test_customer_catalog_shows_assigned_products(): void
+    public function test_customer_catalog_only_shows_products_from_assigned_distributor(): void
+    {
+        $user = $this->customerUser();
+        $assignedProfile = DistributorProfile::firstOrFail();
+
+        $otherDistributorUser = User::factory()->create([
+            'name' => 'Other Distributor User',
+            'email' => 'other-distributor@plywood.com',
+        ]);
+        $otherDistributorUser->assignRole('distributor');
+
+        $otherProfile = DistributorProfile::create([
+            'user_id' => $otherDistributorUser->id,
+            'business_name' => 'Other Plywood Co',
+            'service_cities' => ['Mumbai'],
+            'is_approved' => true,
+        ]);
+
+        $user->update(['distributor_profile_id' => $assignedProfile->id]);
+
+        $visibleProduct = Product::create([
+            'distributor_profile_id' => null,
+            'category_id' => Category::first()->id,
+            'name' => 'Assigned Distributor Ply',
+            'brand' => 'CenturyPly',
+            'thickness' => '16mm',
+            'size' => '8ft x 4ft',
+            'grade' => 'BWR',
+            'in_stock' => true,
+        ]);
+
+        $hiddenProduct = Product::create([
+            'distributor_profile_id' => null,
+            'category_id' => Category::first()->id,
+            'name' => 'Other Distributor Ply',
+            'brand' => 'CenturyPly',
+            'thickness' => '18mm',
+            'size' => '8ft x 4ft',
+            'grade' => 'BWP',
+            'in_stock' => true,
+        ]);
+
+        $assignedProfile->offeredProducts()->attach($visibleProduct->id, ['price' => 1500]);
+        $otherProfile->offeredProducts()->attach($hiddenProduct->id, ['price' => 1600]);
+
+        $this->actingAs($user)
+            ->get(route('customer.catalog.index'))
+            ->assertOk()
+            ->assertSee('Assigned Distributor Ply')
+            ->assertDontSee('Other Distributor Ply');
+    }
+
+    public function test_customer_catalog_is_empty_without_assigned_distributor(): void
     {
         $user = $this->customerUser();
         $profile = DistributorProfile::firstOrFail();
+        $user->update(['distributor_profile_id' => null]);
 
         $product = Product::create([
             'distributor_profile_id' => null,
             'category_id' => Category::first()->id,
-            'name' => 'Assigned Catalog Ply',
+            'name' => 'Unlinked Customer Ply',
             'brand' => 'CenturyPly',
             'thickness' => '16mm',
             'size' => '8ft x 4ft',
@@ -151,14 +204,15 @@ class CustomerPagesTest extends TestCase
         $this->actingAs($user)
             ->get(route('customer.catalog.index'))
             ->assertOk()
-            ->assertSee('Assigned Catalog Ply')
-            ->assertSee('Add to cart');
+            ->assertDontSee('Unlinked Customer Ply')
+            ->assertSee('not linked to a distributor', false);
     }
 
     public function test_customer_can_view_product_detail_page(): void
     {
         $user = $this->customerUser();
         $profile = DistributorProfile::firstOrFail();
+        $user->update(['distributor_profile_id' => $profile->id]);
 
         $product = Product::create([
             'distributor_profile_id' => null,
@@ -191,7 +245,8 @@ class CustomerPagesTest extends TestCase
     public function test_customer_catalog_shows_admin_added_products(): void
     {
         $user = $this->customerUser();
-        $profile = DistributorProfile::first();
+        $profile = DistributorProfile::firstOrFail();
+        $user->update(['distributor_profile_id' => $profile->id]);
 
         $product = Product::create([
             'distributor_profile_id' => null,
@@ -228,6 +283,7 @@ class CustomerPagesTest extends TestCase
     {
         $customer = $this->customerUser();
         $profile = DistributorProfile::firstOrFail();
+        $customer->update(['distributor_profile_id' => $profile->id]);
 
         $product = Product::create([
             'distributor_profile_id' => null,
@@ -293,6 +349,7 @@ class CustomerPagesTest extends TestCase
     {
         $customer = $this->customerUser();
         $profile = DistributorProfile::firstOrFail();
+        $customer->update(['distributor_profile_id' => $profile->id]);
 
         $product = Product::create([
             'distributor_profile_id' => null,
@@ -326,10 +383,56 @@ class CustomerPagesTest extends TestCase
             ->assertSee('Your cart is empty');
     }
 
+    public function test_customer_can_update_cart_item(): void
+    {
+        $customer = $this->customerUser();
+        $profile = DistributorProfile::firstOrFail();
+        $customer->update(['distributor_profile_id' => $profile->id]);
+
+        $product = Product::create([
+            'distributor_profile_id' => null,
+            'category_id' => Category::first()->id,
+            'name' => 'Editable Ply',
+            'brand' => 'CenturyPly',
+            'thickness' => '12mm',
+            'size' => '8ft x 4ft',
+            'grade' => 'BWR',
+            'in_stock' => true,
+        ]);
+
+        $profile->offeredProducts()->attach($product->id, ['price' => 900]);
+
+        $this->actingAs($customer)
+            ->post(route('customer.catalog.add-to-cart', $product), ['quantity' => 1])
+            ->assertRedirect(route('customer.cart.index'));
+
+        $this->actingAs($customer)
+            ->put(route('customer.cart.update', $product), [
+                'quantity' => 11,
+                'notes' => 'Deliver before noon',
+            ])
+            ->assertRedirect(route('customer.cart.index'))
+            ->assertSessionHas('success');
+
+        $this->actingAs($customer)
+            ->get(route('customer.cart.index'))
+            ->assertSee('Editable Ply')
+            ->assertSee('11')
+            ->assertSee('Deliver before noon');
+
+        $this->assertDatabaseHas('cart_items', [
+            'user_id' => $customer->id,
+            'product_id' => $product->id,
+            'quantity' => 11,
+            'notes' => 'Deliver before noon',
+        ]);
+    }
+
     public function test_logout_preserves_customer_cart(): void
     {
         $user = $this->customerUser();
         $profile = DistributorProfile::firstOrFail();
+        $user->update(['distributor_profile_id' => $profile->id]);
 
         $product = Product::create([
             'distributor_profile_id' => null,

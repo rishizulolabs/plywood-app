@@ -36,6 +36,7 @@ class CustomerCart
                 'product_id' => $item->product_id,
                 'product_name' => $product?->name ?? 'Product',
                 'quantity' => $item->quantity,
+                'min_order_qty' => max(1, (int) ($product?->min_order_qty ?? 1)),
                 'distributor_profile_id' => $distributor?->id,
                 'distributor' => $distributor?->business_name,
                 'notes' => $item->notes,
@@ -79,6 +80,17 @@ class CustomerCart
             ->where('user_id', $user->id)
             ->where('product_id', $product->id)
             ->delete();
+    }
+
+    public static function update(User $user, Product $product, int $quantity, ?string $notes): void
+    {
+        CartItem::query()
+            ->where('user_id', $user->id)
+            ->where('product_id', $product->id)
+            ->update([
+                'quantity' => $quantity,
+                'notes' => $notes,
+            ]);
     }
 
     /**

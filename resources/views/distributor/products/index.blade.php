@@ -2,7 +2,7 @@
 
 @section('title', 'Products')
 @section('page-title', 'Products')
-@section('page-subtitle', 'Products assigned to your account with pricing')
+@section('page-subtitle', 'All admin catalog products with your assigned pricing and stock')
 
 @section('content')
 <form class="filters-bar" method="GET" action="{{ route('distributor.products.index') }}">
@@ -30,14 +30,15 @@
 
 <div class="content-card space-y">
     <div class="content-card-header">
-        <p class="content-card-title">Assigned products</p>
-        <span class="badge badge-gray">{{ $products->total() }} assigned</span>
+        <p class="content-card-title">All products</p>
+        <span class="badge badge-gray">{{ $products->total() }} total</span>
     </div>
 
     @if($products->isEmpty())
-        <x-admin.empty-state :message="$search !== '' ? 'No assigned products match your search.' : 'No products assigned yet. Contact admin to add products and pricing to your account.'" />
+        <x-admin.empty-state :message="$search !== '' ? 'No products match your search.' : 'No products in the catalog yet. Contact admin to add products.'" />
     @else
-        <table class="data-table">
+        <div class="table-responsive table-responsive--products">
+        <table class="data-table data-table-products">
             <thead>
                 <tr>
                     <th class="th-image">Image</th>
@@ -54,7 +55,9 @@
             <tbody>
                 @foreach ($products as $product)
                     @php
-                        $totalQuantity = (int) ($product->pivot->stock_quantity ?? 0);
+                        $assignment = $assignments[$product->id] ?? null;
+                        $isAssigned = $assignment !== null;
+                        $totalQuantity = (int) ($assignment->stock_quantity ?? 0);
                         $customerOrder = (int) ($customerOrderTotals[$product->id] ?? 0);
                         $balance = $totalQuantity - $customerOrder;
                     @endphp
@@ -69,7 +72,7 @@
                         <td>{{ $product->name }}</td>
                         <td>{{ $product->brand ?? '—' }}</td>
                         <td>{{ $product->category?->name ?? '—' }}</td>
-                        <td>{{ format_inr($product->pivot->price) }}</td>
+                        <td>{{ $isAssigned ? format_inr($assignment->price) : '—' }}</td>
                         <td>{{ $totalQuantity }}</td>
                         <td>{{ $customerOrder }}</td>
                         <td>
@@ -94,6 +97,7 @@
                 @endforeach
             </tbody>
         </table>
+        </div>
 
         <x-admin.pagination :paginator="$products" />
     @endif

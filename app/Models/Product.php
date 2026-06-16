@@ -69,15 +69,22 @@ class Product extends Model implements HasMedia
             ->withTimestamps();
     }
 
-    public function scopeAssignedToDistributor($query): void
+    public function scopeAssignedToDistributor($query, ?int $distributorProfileId = null): void
     {
-        $query->whereHas('distributors', fn ($distributorQuery) => $distributorQuery->where('is_approved', true));
+        $query->whereHas('distributors', function ($distributorQuery) use ($distributorProfileId) {
+            $distributorQuery->where('is_approved', true);
+
+            if ($distributorProfileId !== null) {
+                $distributorQuery->where('distributor_profiles.id', $distributorProfileId);
+            }
+        });
     }
 
-    public function isAssignedToDistributor(): bool
+    public function isAssignedToDistributor(?int $distributorProfileId = null): bool
     {
         return $this->distributors()
             ->where('is_approved', true)
+            ->when($distributorProfileId !== null, fn ($query) => $query->where('distributor_profiles.id', $distributorProfileId))
             ->exists();
     }
 

@@ -131,6 +131,7 @@
         @if($recentOrders->isEmpty())
             <x-admin.empty-state message="No recent orders." />
         @else
+            <div class="table-responsive">
             <table class="data-table">
                 <thead>
                     <tr>
@@ -159,6 +160,7 @@
                     @endforeach
                 </tbody>
             </table>
+            </div>
         @endif
     </div>
 @endif

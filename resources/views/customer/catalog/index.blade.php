@@ -2,7 +2,13 @@
 
 @section('title', 'Browse Catalog')
 @section('page-title', 'Browse Catalog')
-@section('page-subtitle', 'Products available from approved distributors')
+@section('page-subtitle')
+    @if($distributor)
+        Products offered by {{ $distributor->business_name ?: ($distributor->user?->name ?? 'your distributor') }}
+    @else
+        Products appear here once your account is linked to an approved distributor.
+    @endif
+@endsection
 
 @section('content')
 @php
@@ -47,7 +53,7 @@
     </div>
 
     @if($products->isEmpty())
-        <x-admin.empty-state :message="$hasActiveFilters ? 'No products match your search.' : 'No products are available yet. Products appear here once a distributor is assigned.'" />
+        <x-admin.empty-state :message="$hasActiveFilters ? 'No products match your search.' : ($distributor ? 'No products have been assigned to your distributor yet.' : 'Your account is not linked to a distributor yet. Contact admin to get access to products.')" />
     @else
         <div class="customer-catalog-grid">
             @foreach ($products as $product)

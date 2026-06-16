@@ -34,7 +34,7 @@ class DemoUsersSeeder extends Seeder
         );
         $distributorUser->syncRoles(['distributor']);
 
-        DistributorProfile::updateOrCreate(
+        $distributorProfile = DistributorProfile::updateOrCreate(
             ['user_id' => $distributorUser->id],
             [
                 'business_name' => 'Kumar Plywood Distributors',
@@ -43,5 +43,9 @@ class DemoUsersSeeder extends Seeder
                 'is_approved' => true,
             ]
         );
+
+        $customer->update([
+            'distributor_profile_id' => $distributorProfile->id,
+        ]);
     }
 }

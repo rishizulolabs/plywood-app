@@ -358,7 +358,7 @@
     aria-labelledby="view-distributor-modal-title"
     aria-hidden="true"
 >
-    <div class="modal-dialog modal-dialog-wide">
+    <div class="modal-dialog modal-dialog-wide modal-dialog-view-distributor">
         <div class="modal-header">
             <h2 class="modal-title" id="view-distributor-modal-title">Distributor details</h2>
             <button type="button" class="btn-close-modal" id="btn-close-view-distributor" aria-label="Close">
@@ -409,61 +409,105 @@
     var editModal = bindModal('edit-modal-backdrop', 'edit-distributor-modal', null, 'btn-close-edit-distributor', 'btn-cancel-edit-distributor');
     var viewModal = bindModal('view-distributor-modal-backdrop', 'view-distributor-modal', null, 'btn-close-view-distributor', null);
 
+    function escapeHtml(value) {
+        if (value === null || value === undefined) {
+            return '';
+        }
+
+        return String(value)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;');
+    }
+
     function detailRow(label, value) {
-        var display = (value === null || value === undefined || value === '') ? '—' : value;
-        return '<div class="product-spec-item"><dt>' + label + '</dt><dd>' + display + '</dd></div>';
+        var display = value === null || value === undefined || value === '' ? '—' : value;
+
+        return '<div class="distributor-view-row">' +
+            '<dt class="distributor-view-label">' + escapeHtml(label) + '</dt>' +
+            '<dd class="distributor-view-value">' + escapeHtml(display) + '</dd>' +
+            '</div>';
+    }
+
+    function stockLabel(quantity) {
+        var qty = Number(quantity);
+        if (!Number.isFinite(qty) || qty <= 0) {
+            return { text: 'Out of stock', className: 'distributor-view-stock-out' };
+        }
+
+        return { text: qty + ' in stock', className: 'distributor-view-stock-in' };
     }
 
     function renderDistributorDetail(data) {
+        var name = data.name || 'Distributor';
+        var initial = escapeHtml(name.charAt(0).toUpperCase());
         var statusBadge = data.is_approved
             ? '<span class="badge badge-green">Approved</span>'
             : '<span class="badge badge-yellow">Not approved</span>';
+        var productCount = Array.isArray(data.offered_products) ? data.offered_products.length : 0;
+        var totalStock = data.total_stock_quantity ?? 0;
 
         var productsHtml = '';
-        if (Array.isArray(data.offered_products) && data.offered_products.length) {
-            productsHtml = '<div class="distributor-commercial-products">' +
-                '<p class="form-section-title">Products &amp; pricing</p>' +
-                '<table class="data-table distributor-commercial-table">' +
-                '<thead><tr><th>Product</th><th>Category</th><th>Grade</th><th>Size</th><th>Qty</th><th>Price</th></tr></thead><tbody>';
+        if (productCount) {
+            productsHtml = '<div class="distributor-view-table-wrap">' +
+                '<table class="data-table distributor-detail-table">' +
+                '<thead><tr><th>Product</th><th>Category</th><th>Grade</th><th>Size</th><th>Stock</th><th class="th-price">Price</th></tr></thead><tbody>';
 
             data.offered_products.forEach(function (product) {
+                var stock = stockLabel(product.stock_quantity);
+
                 productsHtml += '<tr>' +
-                    '<td>' + (product.name || '—') + '</td>' +
-                    '<td>' + (product.category || '—') + '</td>' +
-                    '<td>' + (product.grade || '—') + '</td>' +
-                    '<td>' + (product.size || '—') + '</td>' +
-                    '<td>' + (product.stock_quantity !== null && product.stock_quantity !== undefined ? product.stock_quantity : '—') + '</td>' +
-                    '<td class="cell-nowrap">' + (product.price || '—') + '</td>' +
+                    '<td><span class="distributor-view-product-name">' + escapeHtml(product.name || '—') + '</span></td>' +
+                    '<td>' + escapeHtml(product.category || '—') + '</td>' +
+                    '<td>' + escapeHtml(product.grade || '—') + '</td>' +
+                    '<td class="cell-nowrap">' + escapeHtml(product.size || '—') + '</td>' +
+                    '<td><span class="' + stock.className + '">' + escapeHtml(stock.text) + '</span></td>' +
+                    '<td class="distributor-detail-price">' + escapeHtml(product.price || '—') + '</td>' +
                     '</tr>';
             });
 
             productsHtml += '</tbody></table></div>';
         } else {
-            productsHtml = '<div class="distributor-commercial-products">' +
-                '<p class="form-section-title">Products &amp; pricing</p>' +
-                '<p class="form-helper">No products configured for this distributor.</p></div>';
+            productsHtml = '<div class="distributor-view-empty">' +
+                '<p class="distributor-view-empty-title">No products configured</p>' +
+                '<p class="form-helper">Edit this distributor to assign products and set pricing.</p>' +
+            '</div>';
         }
 
-        return '<div class="distributor-commercial-view">' +
-            '<div class="form-section">' +
-                '<p class="form-section-title">Contact</p>' +
-                '<dl class="product-spec-list">' +
-                    detailRow('Name', data.name) +
+        return '<div class="distributor-view-form">' +
+            '<div class="distributor-view-card distributor-view-profile">' +
+                '<div class="distributor-view-profile-top">' +
+                    '<span class="distributor-view-avatar" aria-hidden="true">' + initial + '</span>' +
+                    '<div class="distributor-view-summary-body">' +
+                        '<p class="distributor-view-name">' + escapeHtml(name) + '</p>' +
+                        '<div class="distributor-view-summary-meta">' + statusBadge + '</div>' +
+                    '</div>' +
+                    '<div class="distributor-view-quick-stats">' +
+                        '<div class="distributor-view-quick-stat">' +
+                            '<span class="distributor-view-quick-stat-value">' + productCount + '</span>' +
+                            '<span class="distributor-view-quick-stat-label">Products</span>' +
+                        '</div>' +
+                        '<div class="distributor-view-quick-stat">' +
+                            '<span class="distributor-view-quick-stat-value">' + escapeHtml(totalStock) + '</span>' +
+                            '<span class="distributor-view-quick-stat-label">Total stock</span>' +
+                        '</div>' +
+                    '</div>' +
+                '</div>' +
+                '<dl class="distributor-view-details">' +
                     detailRow('Email', data.email) +
                     detailRow('Phone', data.phone) +
                     detailRow('Location', data.location) +
-                    detailRow('Status', statusBadge) +
                     detailRow('Registered', data.registered) +
                 '</dl>' +
             '</div>' +
-            '<div class="form-section">' +
-                '<p class="form-section-title">Products</p>' +
-                '<dl class="product-spec-list">' +
-                    detailRow('Total qty', data.total_stock_quantity) +
-                    detailRow('Allotted products', data.allotted_products_count) +
-                '</dl>' +
+            '<div class="distributor-view-card distributor-view-products">' +
+                '<div class="distributor-view-section-head">' +
+                    '<p class="distributor-view-section-title">Products &amp; pricing</p>' +
+                    (productCount ? '<span class="badge badge-gray">' + productCount + ' products</span>' : '') +
+                '</div>' +
+                productsHtml +
             '</div>' +
-            productsHtml +
         '</div>';
     }
 
@@ -473,7 +517,8 @@
         if (!wrap || !viewModal) return;
 
         if (title) {
-            title.textContent = data.name ? data.name + ' — Details' : 'Distributor details';
+            var distributorName = data.name || 'Distributor';
+            title.textContent = distributorName !== 'Distributor' ? distributorName : 'View Distributor';
         }
 
         wrap.innerHTML = renderDistributorDetail(data);

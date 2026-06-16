@@ -30,6 +30,7 @@ class AdminPagesTest extends TestCase
             route('admin.categories.index'),
             route('admin.customer-orders.index'),
             route('admin.distributor-orders.index'),
+            route('admin.analytics.index'),
             route('admin.settings.index'),
         ];
 
@@ -462,8 +463,8 @@ class AdminPagesTest extends TestCase
             ->assertSee('commercial@plywood.com')
             ->assertSee('Commercial Ply 18mm')
             ->assertSee('btn-quick-view', false)
-            ->assertSee('Total qty', false)
             ->assertSee('Allotted products', false)
+            ->assertSee('Total stock', false)
             ->assertSee("data-distributor='", false);
 
         $html = $response->getContent();
@@ -485,7 +486,166 @@ class AdminPagesTest extends TestCase
         $this->assertSame(1, $payload['allotted_products_count'] ?? null);
         $this->assertSame(25, $payload['total_stock_quantity'] ?? null);
         $this->assertSame(25, $payload['offered_products'][0]['stock_quantity'] ?? null);
-        $response->assertSee('>Qty</th>', false);
+        $response->assertSee('>Stock</th>', false);
+    }
+
+    public function test_admin_analytics_shows_distributor_orders_and_products(): void
+    {
+        $admin = User::factory()->create();
+        $admin->assignRole('admin');
+
+        $distributorUser = User::factory()->create([
+            'name' => 'Analytics Dist',
+            'email' => 'analytics@plywood.com',
+        ]);
+        $distributorUser->assignRole('distributor');
+
+        $profile = \App\Models\DistributorProfile::create([
+            'user_id' => $distributorUser->id,
+            'business_name' => 'Analytics Dist',
+            'is_approved' => true,
+        ]);
+
+        $category = \App\Models\Category::create(['name' => 'Analytics Ply', 'slug' => 'analytics-ply']);
+
+        $product = \App\Models\Product::create([
+            'distributor_profile_id' => $profile->id,
+            'category_id' => $category->id,
+            'name' => 'Analytics Ply 18mm',
+            'grade' => 'BWP',
+            'size' => '8ft x 4ft',
+        ]);
+
+        $profile->offeredProducts()->attach($product->id, ['price' => 6200, 'stock_quantity' => 10]);
+
+        \App\Models\RestockRequest::create([
+            'distributor_profile_id' => $profile->id,
+            'product_id' => $product->id,
+            'quantity' => 5,
+            'unit_price' => 6200,
+            'total_amount' => 31000,
+            'status' => 'pending',
+        ]);
+
+        $customer = User::factory()->create(['name' => 'Analytics Customer']);
+        $customer->assignRole('customer');
+
+        $inquiry = \App\Models\Inquiry::create([
+            'customer_id' => $customer->id,
+            'distributor_profile_id' => $profile->id,
+            'status' => 'converted',
+            'delivery_city' => 'Delhi',
+            'delivery_pincode' => '110001',
+        ]);
+
+        \App\Models\InquiryItem::create([
+            'inquiry_id' => $inquiry->id,
+            'product_id' => $product->id,
+            'quantity' => 2,
+        ]);
+
+        \App\Models\Order::create([
+            'inquiry_id' => $inquiry->id,
+            'customer_id' => $customer->id,
+            'distributor_profile_id' => $profile->id,
+            'total_amount' => 12400,
+            'payment_status' => 'paid',
+            'fulfillment_status' => 'processing',
+            'delivery_address' => 'Delhi warehouse',
+        ]);
+
+        $this->actingAs($admin)
+            ->get(route('admin.analytics.index'))
+            ->assertOk()
+            ->assertSee('All distributors')
+            ->assertSee('Analytics Dist')
+            ->assertSee('Analytics Ply 18mm')
+            ->assertSee('Total purchase value')
+            ->assertSee('Recent purchase orders');
+
+        $this->actingAs($admin)
+            ->get(route('admin.analytics.index', ['distributor' => $profile->id]))
+            ->assertOk()
+            ->assertSee('Analytics Dist')
+            ->assertSee('Analytics Ply 18mm')
+            ->assertSee('Purchase value')
+            ->assertSee('Products &amp; quantity', false)
+            ->assertSee('Recent purchase orders')
+            ->assertSee('View all')
+            ->assertSee('data-detail=', false);
+    }
+
+    public function test_admin_analytics_purchase_total_is_scoped_to_selected_distributor(): void
+    {
+        $admin = User::factory()->create();
+        $admin->assignRole('admin');
+
+        $category = \App\Models\Category::create(['name' => 'Scope Ply', 'slug' => 'scope-ply']);
+
+        $firstUser = User::factory()->create(['name' => 'First Dist']);
+        $firstUser->assignRole('distributor');
+        $firstProfile = \App\Models\DistributorProfile::create([
+            'user_id' => $firstUser->id,
+            'business_name' => 'First Dist',
+            'is_approved' => true,
+        ]);
+
+        $secondUser = User::factory()->create(['name' => 'Second Dist']);
+        $secondUser->assignRole('distributor');
+        $secondProfile = \App\Models\DistributorProfile::create([
+            'user_id' => $secondUser->id,
+            'business_name' => 'Second Dist',
+            'is_approved' => true,
+        ]);
+
+        $firstProduct = \App\Models\Product::create([
+            'distributor_profile_id' => $firstProfile->id,
+            'category_id' => $category->id,
+            'name' => 'First Product',
+        ]);
+
+        $secondProduct = \App\Models\Product::create([
+            'distributor_profile_id' => $secondProfile->id,
+            'category_id' => $category->id,
+            'name' => 'Second Product',
+        ]);
+
+        \App\Models\RestockRequest::create([
+            'distributor_profile_id' => $firstProfile->id,
+            'product_id' => $firstProduct->id,
+            'quantity' => 2,
+            'unit_price' => 10000,
+            'total_amount' => 20000,
+            'status' => 'pending',
+        ]);
+
+        \App\Models\RestockRequest::create([
+            'distributor_profile_id' => $secondProfile->id,
+            'product_id' => $secondProduct->id,
+            'quantity' => 3,
+            'unit_price' => 10000,
+            'total_amount' => 30000,
+            'status' => 'pending',
+        ]);
+
+        $this->actingAs($admin)
+            ->get(route('admin.analytics.index'))
+            ->assertOk()
+            ->assertSee('₹50,000.00', false);
+
+        $this->actingAs($admin)
+            ->get(route('admin.analytics.index', ['distributor' => $firstProfile->id]))
+            ->assertOk()
+            ->assertSee('₹20,000.00', false)
+            ->assertDontSee('₹50,000.00', false)
+            ->assertSee('First Dist');
+
+        $this->actingAs($admin)
+            ->get(route('admin.analytics.index', ['distributor' => $secondProfile->id]))
+            ->assertOk()
+            ->assertSee('₹30,000.00', false)
+            ->assertDontSee('₹50,000.00', false)
+            ->assertSee('Second Dist');
     }
 
     public function test_admin_edit_distributor_includes_existing_product_prices(): void

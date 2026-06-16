@@ -48,6 +48,7 @@
     @if($customers->isEmpty())
         <x-admin.empty-state :message="$hasActiveFilters ? 'No customers match your search. Try different keywords or clear search.' : 'No customers found. Click Add Customer to create one.'" />
     @else
+        <div class="table-responsive">
         <table class="data-table">
             <thead>
                 <tr>
@@ -104,6 +105,7 @@
                 @endforeach
             </tbody>
         </table>
+        </div>
         <x-admin.pagination :paginator="$customers" />
     @endif
 </div>

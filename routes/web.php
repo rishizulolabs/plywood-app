@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\AnalyticsController as AdminAnalyticsController;
 use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
 use App\Http\Controllers\Admin\CustomerController as AdminCustomerController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
@@ -50,6 +51,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::post('/customer-orders', [AdminOrderController::class, 'store'])->name('customer-orders.store');
     Route::get('/distributor-orders', [AdminDistributorOrderController::class, 'index'])->name('distributor-orders.index');
     Route::patch('/distributor-orders/{restockRequest}/status', [AdminDistributorOrderController::class, 'updateStatus'])->name('distributor-orders.status');
+    Route::get('/analytics', [AdminAnalyticsController::class, 'index'])->name('analytics.index');
     Route::get('/settings', [AdminSettingsController::class, 'index'])->name('settings.index');
     Route::put('/settings', [AdminSettingsController::class, 'update'])->name('settings.update');
 });
@@ -60,6 +62,7 @@ Route::middleware(['auth', 'role:customer'])->prefix('customer')->name('customer
     Route::get('/catalog/{product}', [CustomerCatalogController::class, 'show'])->name('catalog.show');
     Route::post('/catalog/{product}/cart', [CustomerCatalogController::class, 'addToCart'])->name('catalog.add-to-cart');
     Route::get('/cart', [CustomerCartController::class, 'index'])->name('cart.index');
+    Route::put('/cart/items/{product}', [CustomerCartController::class, 'update'])->name('cart.update');
     Route::delete('/cart/items/{product}', [CustomerCartController::class, 'remove'])->name('cart.remove');
     Route::post('/cart/proceed', [CustomerCartController::class, 'proceed'])->name('cart.proceed');
     Route::get('/orders', [CustomerOrderController::class, 'index'])->name('orders.index');

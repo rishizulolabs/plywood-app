@@ -10,23 +10,22 @@ class InquiryDistributorResolver
 {
     public static function forProduct(Product $product, User $customer): ?DistributorProfile
     {
+        if ($customer->distributor_profile_id) {
+            $assigned = DistributorProfile::query()
+                ->whereKey($customer->distributor_profile_id)
+                ->where('is_approved', true)
+                ->first();
+
+            if ($assigned && $product->isAssignedToDistributor($assigned->id)) {
+                return $assigned;
+            }
+        }
+
         if ($product->distributor_profile_id) {
             return $product->distributorProfile;
         }
 
-        if ($customer->distributor_profile_id) {
-            return DistributorProfile::query()->find($customer->distributor_profile_id);
-        }
-
-        $offered = $product->distributors()
-            ->where('is_approved', true)
-            ->first();
-
-        if ($offered) {
-            return $offered;
-        }
-
-        return DistributorProfile::query()
+        return $product->distributors()
             ->where('is_approved', true)
             ->first();
     }

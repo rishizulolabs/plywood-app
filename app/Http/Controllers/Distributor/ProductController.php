@@ -24,11 +24,12 @@ class ProductController extends DistributorController
             return view('distributor.products.index', [
                 'products' => $products,
                 'search' => $search,
+                'assignments' => collect(),
                 'customerOrderTotals' => collect(),
             ]);
         }
 
-        $products = $profile->offeredProducts()
+        $products = Product::query()
             ->with(['category', 'media'])
             ->when($search !== '', function ($query) use ($search) {
                 $query->where(function ($inner) use ($search) {
@@ -45,6 +46,14 @@ class ProductController extends DistributorController
 
         $productIds = $products->getCollection()->pluck('id');
 
+        $assignments = $productIds->isEmpty()
+            ? collect()
+            : DB::table('distributor_product')
+                ->where('distributor_profile_id', $profile->id)
+                ->whereIn('product_id', $productIds)
+                ->get()
+                ->keyBy('product_id');
+
         $customerOrderTotals = $productIds->isEmpty()
             ? collect()
             : InquiryItem::query()
@@ -59,6 +68,7 @@ class ProductController extends DistributorController
         return view('distributor.products.index', [
             'products' => $products,
             'search' => $search,
+            'assignments' => $assignments,
             'customerOrderTotals' => $customerOrderTotals,
         ]);
     }
@@ -76,7 +86,14 @@ class ProductController extends DistributorController
             ->first();
 
         if (! $assignedProduct) {
-            abort(404);
+            $profile->offeredProducts()->attach($product->id, [
+                'price' => 0,
+                'stock_quantity' => 0,
+            ]);
+
+            $assignedProduct = $profile->offeredProducts()
+                ->where('products.id', $product->id)
+                ->first();
         }
 
         $validated = $request->validate([

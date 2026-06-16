@@ -29,6 +29,7 @@
     @if($orders->isEmpty())
         <x-admin.empty-state message="No customer orders found." />
     @else
+        <div class="table-responsive">
         <table class="data-table">
             <thead>
                 <tr>
@@ -36,7 +37,6 @@
                     <th>Customer</th>
                     <th>Product</th>
                     <th>Distributor</th>
-                    <th>Amount</th>
                     <th>Payment</th>
                     <th>Status</th>
                 </tr>
@@ -52,7 +52,6 @@
                         <td>{{ $order->customer?->name ?? '—' }}</td>
                         <td>{{ $productLabel ?: '—' }}</td>
                         <td>{{ $order->distributorProfile?->user?->name ?? $order->distributorProfile?->business_name ?? '—' }}</td>
-                        <td>{{ format_inr($order->total_amount) }}</td>
                         <td><span class="badge badge-gray">{{ ucfirst($order->payment_status) }}</span></td>
                         <td>
                             @if($order->fulfillment_status === 'delivered')
@@ -67,6 +66,7 @@
                 @endforeach
             </tbody>
         </table>
+        </div>
         <x-admin.pagination :paginator="$orders" />
     @endif
 </div>
