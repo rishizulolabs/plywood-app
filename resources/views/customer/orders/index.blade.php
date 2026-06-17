@@ -1,8 +1,13 @@
 @extends('layouts.customer')
 
 @section('title', 'Orders')
-@section('page-title', 'Orders')
-@section('page-subtitle', 'Orders placed from your cart')
+
+@section('page-heading')
+<div class="admin-page-heading">
+    <h1>Orders</h1>
+    <p class="admin-page-subtitle">Orders placed from your cart</p>
+</div>
+@endsection
 
 @section('content')
 <div class="stat-cards">
@@ -28,40 +33,48 @@
     @if($orders->isEmpty())
         <x-admin.empty-state message="No orders yet. Add products to your cart and click Proceed to place an order." />
     @else
-        <div class="table-responsive">
-        <table class="data-table">
+        <div class="table-responsive table-responsive-inset table-responsive--orders">
+        <table class="data-table data-table-bordered data-table-orders">
             <thead>
                 <tr>
                     <th>Order #</th>
                     <th>Distributor</th>
-                    <th>Products</th>
-                    <th>Amount</th>
+                    <th>Product</th>
+                    <th>Qty</th>
                     <th>Payment</th>
                     <th>Status</th>
+                    <th>Order Date</th>
                 </tr>
             </thead>
             <tbody>
                 @foreach ($orders as $order)
                     @php
                         $items = $order->inquiry?->items ?? collect();
-                        $productLabel = $items->map(fn ($item) => ($item->product?->name ?? 'Product').' × '.$item->quantity)->join(', ');
+                        $itemCount = $items->count();
                     @endphp
-                    <tr>
-                        <td>{{ $order->order_number }}</td>
-                        <td>{{ $order->distributorProfile?->business_name ?? '—' }}</td>
-                        <td>{{ $productLabel ?: '—' }}</td>
-                        <td>{{ format_inr($order->total_amount) }}</td>
-                        <td><span class="badge badge-gray">{{ ucfirst($order->payment_status) }}</span></td>
-                        <td>
-                            @if($order->fulfillment_status === 'delivered')
-                                <span class="badge badge-green">{{ ucfirst($order->fulfillment_status) }}</span>
-                            @elseif($order->fulfillment_status === 'cancelled')
-                                <span class="badge badge-gray">{{ ucfirst($order->fulfillment_status) }}</span>
-                            @else
-                                <span class="badge badge-yellow">{{ ucfirst($order->fulfillment_status) }}</span>
+                    @foreach ($items as $item)
+                        <tr>
+                            @if ($loop->first)
+                                <td rowspan="{{ $itemCount }}">{{ $order->order_number }}</td>
+                                <td rowspan="{{ $itemCount }}">{{ $order->distributorProfile?->business_name ?? '—' }}</td>
                             @endif
-                        </td>
-                    </tr>
+                            <td>{{ $item->product?->name ?? 'Product' }}</td>
+                            <td>{{ $item->quantity }}</td>
+                            @if ($loop->first)
+                                <td rowspan="{{ $itemCount }}"><span class="badge badge-gray">{{ ucfirst($order->payment_status) }}</span></td>
+                                <td rowspan="{{ $itemCount }}">
+                                    @if($order->fulfillment_status === 'delivered')
+                                        <span class="badge badge-green">{{ ucfirst($order->fulfillment_status) }}</span>
+                                    @elseif($order->fulfillment_status === 'cancelled')
+                                        <span class="badge badge-gray">{{ ucfirst($order->fulfillment_status) }}</span>
+                                    @else
+                                        <span class="badge badge-yellow">{{ ucfirst($order->fulfillment_status) }}</span>
+                                    @endif
+                                </td>
+                                <td rowspan="{{ $itemCount }}">{{ $order->created_at?->format('d M Y') ?? '—' }}</td>
+                            @endif
+                        </tr>
+                    @endforeach
                 @endforeach
             </tbody>
         </table>

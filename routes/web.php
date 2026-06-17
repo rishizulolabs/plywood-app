@@ -22,7 +22,9 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PublicCatalogController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', [PublicCatalogController::class, 'index'])->name('home');
+Route::get('/', function () {
+    return redirect()->route('login');
+})->name('home');
 
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/', [AdminDashboardController::class, 'index'])->name('dashboard');

@@ -52,41 +52,8 @@ class DashboardController extends CustomerController
             ],
         ];
 
-        $quickActions = [
-            [
-                'title' => 'Browse catalog',
-                'desc' => 'Explore plywood by category and specs',
-                'icon' => 'icon-layers',
-                'href' => route('customer.catalog.index'),
-                'color' => 'blue',
-            ],
-            [
-                'title' => 'Cart',
-                'desc' => 'Review products before placing an order',
-                'icon' => 'icon-shopping-cart',
-                'href' => route('customer.cart.index'),
-                'color' => 'purple',
-            ],
-            [
-                'title' => 'My orders',
-                'desc' => 'View payment and delivery status',
-                'icon' => 'icon-package',
-                'href' => route('customer.orders.index'),
-                'color' => 'green',
-            ],
-            [
-                'title' => 'Profile',
-                'desc' => 'Update company and delivery details',
-                'icon' => 'icon-user',
-                'href' => route('profile.edit'),
-                'color' => 'amber',
-            ],
-        ];
-
         return view('customer.dashboard', compact(
-            'user',
             'stats',
-            'quickActions',
             'recentOrders',
             'orderCount',
         ));

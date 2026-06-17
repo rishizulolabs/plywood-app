@@ -29,13 +29,14 @@
     @if($orders->isEmpty())
         <x-admin.empty-state message="No customer orders found." />
     @else
-        <div class="table-responsive">
-        <table class="data-table">
+        <div class="table-responsive table-responsive-inset table-responsive--orders">
+        <table class="data-table data-table-bordered data-table-orders">
             <thead>
                 <tr>
                     <th>Order #</th>
                     <th>Customer</th>
                     <th>Product</th>
+                    <th>Qty</th>
                     <th>Distributor</th>
                     <th>Payment</th>
                     <th>Status</th>
@@ -45,24 +46,31 @@
                 @foreach ($orders as $order)
                     @php
                         $items = $order->inquiry?->items ?? collect();
-                        $productLabel = $items->map(fn ($item) => ($item->product?->name ?? 'Product').' × '.$item->quantity)->join(', ');
+                        $itemCount = $items->count();
                     @endphp
-                    <tr>
-                        <td>{{ $order->order_number }}</td>
-                        <td>{{ $order->customer?->name ?? '—' }}</td>
-                        <td>{{ $productLabel ?: '—' }}</td>
-                        <td>{{ $order->distributorProfile?->user?->name ?? $order->distributorProfile?->business_name ?? '—' }}</td>
-                        <td><span class="badge badge-gray">{{ ucfirst($order->payment_status) }}</span></td>
-                        <td>
-                            @if($order->fulfillment_status === 'delivered')
-                                <span class="badge badge-green">{{ ucfirst($order->fulfillment_status) }}</span>
-                            @elseif($order->fulfillment_status === 'cancelled')
-                                <span class="badge badge-gray">{{ ucfirst($order->fulfillment_status) }}</span>
-                            @else
-                                <span class="badge badge-yellow">{{ ucfirst($order->fulfillment_status) }}</span>
+                    @foreach ($items as $item)
+                        <tr>
+                            @if ($loop->first)
+                                <td rowspan="{{ $itemCount }}">{{ $order->order_number }}</td>
+                                <td rowspan="{{ $itemCount }}">{{ $order->customer?->name ?? '—' }}</td>
                             @endif
-                        </td>
-                    </tr>
+                            <td>{{ $item->product?->name ?? 'Product' }}</td>
+                            <td>{{ $item->quantity }}</td>
+                            @if ($loop->first)
+                                <td rowspan="{{ $itemCount }}">{{ $order->distributorProfile?->user?->name ?? $order->distributorProfile?->business_name ?? '—' }}</td>
+                                <td rowspan="{{ $itemCount }}"><span class="badge badge-gray">{{ ucfirst($order->payment_status) }}</span></td>
+                                <td rowspan="{{ $itemCount }}">
+                                    @if($order->fulfillment_status === 'delivered')
+                                        <span class="badge badge-green">{{ ucfirst($order->fulfillment_status) }}</span>
+                                    @elseif($order->fulfillment_status === 'cancelled')
+                                        <span class="badge badge-gray">{{ ucfirst($order->fulfillment_status) }}</span>
+                                    @else
+                                        <span class="badge badge-yellow">{{ ucfirst($order->fulfillment_status) }}</span>
+                                    @endif
+                                </td>
+                            @endif
+                        </tr>
+                    @endforeach
                 @endforeach
             </tbody>
         </table>

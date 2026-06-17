@@ -194,6 +194,9 @@ body {
 /* Main content */
 .main-content {
   padding: 1.5rem 2rem;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 /* Page header card */
@@ -537,6 +540,9 @@ body {
   box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
   overflow: hidden;
   margin-top: 1.5rem;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .content-card.space-y {
@@ -710,9 +716,70 @@ body {
   background: #f9fafb;
 }
 
+.data-table.data-table-bordered {
+  border: 1px solid #d1d5db;
+}
+
+.data-table.data-table-bordered th,
+.data-table.data-table-bordered td {
+  border: 1px solid #d1d5db;
+}
+
+.data-table.data-table-orders {
+  width: 100%;
+  table-layout: auto;
+}
+
+.data-table.data-table-orders th,
+.data-table.data-table-orders td {
+  padding: 0.625rem 0.75rem;
+}
+
+.data-table.data-table-orders th:first-child,
+.data-table.data-table-orders td:first-child {
+  padding-left: 0.875rem;
+}
+
+.data-table.data-table-orders th:last-child,
+.data-table.data-table-orders td:last-child {
+  padding-right: 0.875rem;
+}
+
+.data-table-orders .status-btn,
+.data-table-orders .status-dropdown-trigger {
+  width: auto;
+  min-width: 0;
+}
+
+.table-responsive--orders .data-table {
+  width: 100%;
+  min-width: 0;
+}
+
+@media (max-width: 767px) {
+  .table-responsive--orders .data-table {
+    min-width: 36rem;
+  }
+}
+
+.content-card .table-responsive.table-responsive-inset {
+  margin: 0;
+  padding: 0 1.5rem 1.5rem;
+  box-sizing: border-box;
+  scroll-padding-inline: 1rem;
+}
+
+@media (max-width: 767px) {
+  .content-card .table-responsive.table-responsive-inset {
+    margin: 0;
+    padding: 0 1rem 1rem;
+  }
+}
+
 .table-responsive {
   width: 100%;
   max-width: 100%;
+  box-sizing: border-box;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
 }
@@ -2471,10 +2538,15 @@ body {
   }
 
   .content-card .table-responsive {
-    margin: 0 -1rem;
+    margin: 0;
     padding: 0 1rem;
     scrollbar-width: thin;
     scrollbar-color: #d1d5db transparent;
+  }
+
+  .content-card .table-responsive.table-responsive-inset {
+    margin: 0;
+    padding: 0 1rem 1rem;
   }
 
   .content-card .table-responsive::-webkit-scrollbar {
@@ -4277,7 +4349,10 @@ body {
   border: none;
   border-radius: 0.75rem;
   box-shadow: 0 1px 2px rgb(15 23 42 / 0.04), 0 6px 16px rgb(15 23 42 / 0.04);
-  overflow: hidden;
+  overflow: visible;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .analytics-section-header {
@@ -4319,8 +4394,48 @@ body {
   margin: 0;
 }
 
+.analytics-section-card .analytics-data-table.data-table-orders {
+  width: 100%;
+  min-width: 0;
+  font-size: 0.8125rem;
+}
+
+.analytics-section-card .analytics-data-table.data-table-orders th,
+.analytics-section-card .analytics-data-table.data-table-orders td {
+  padding: 0.5rem 0.625rem;
+}
+
+.analytics-section-card .analytics-data-table.data-table-orders th:first-child,
+.analytics-section-card .analytics-data-table.data-table-orders td:first-child {
+  padding-left: 0.75rem;
+}
+
+.analytics-section-card .analytics-data-table.data-table-orders th:last-child,
+.analytics-section-card .analytics-data-table.data-table-orders td:last-child {
+  padding-right: 0.75rem;
+}
+
+.analytics-section-card .analytics-data-table.data-table-orders .status-btn {
+  width: auto;
+  min-width: 0;
+  padding: 0.3125rem 0.5rem;
+}
+
+.analytics-section-card .table-responsive--orders .data-table {
+  min-width: 0;
+}
+
+@media (max-width: 1023px) {
+  .analytics-section-card .table-responsive--orders .data-table {
+    min-width: 48rem;
+  }
+}
+
 .analytics-section-card .table-responsive {
+  margin: 0;
   padding: 0 1.5rem 1.5rem;
+  box-sizing: border-box;
+  scroll-padding-inline: 1rem;
 }
 
 .analytics-section-card .analytics-panel-empty {

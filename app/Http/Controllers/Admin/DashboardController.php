@@ -69,7 +69,7 @@ class DashboardController extends Controller
                 ],
                 [
                     'label' => 'Distributor purchases',
-                    'value' => format_inr($distributorBuyingTotal),
+                    'value' => format_inr_compact($distributorBuyingTotal),
                     'desc' => $restockRequestsThisMonth > 0
                         ? $restockRequestsThisMonth.' restock request'.($restockRequestsThisMonth === 1 ? '' : 's').' this month'
                         : $restockRequestsTotal.' total restock requests',

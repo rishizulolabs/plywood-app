@@ -54,36 +54,6 @@ class DashboardController extends DistributorController
             ],
         ];
 
-        $quickActions = [
-            [
-                'title' => 'Manage products',
-                'desc' => 'View and update your plywood listings',
-                'icon' => 'icon-database',
-                'href' => route('distributor.products.index'),
-                'color' => 'blue',
-            ],
-            [
-                'title' => 'Track orders',
-                'desc' => 'Monitor payment and fulfillment',
-                'icon' => 'icon-package',
-                'href' => route('distributor.orders.index'),
-                'color' => 'green',
-            ],
-            [
-                'title' => 'Purchase orders',
-                'desc' => 'View restock requests placed with admin',
-                'icon' => 'icon-file-text',
-                'href' => route('distributor.purchase-orders.index'),
-                'color' => 'purple',
-            ],
-        ];
-
-        return view('distributor.dashboard', compact(
-            'user',
-            'profile',
-            'stats',
-            'quickActions',
-            'isApproved',
-        ));
+        return view('distributor.dashboard', compact('stats'));
     }
 }

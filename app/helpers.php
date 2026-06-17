@@ -26,3 +26,26 @@ if (! function_exists('format_inr')) {
         return ($negative ? '-' : '').'₹'.$result;
     }
 }
+
+if (! function_exists('format_inr_compact')) {
+    function format_inr_compact(float|int|string $amount): string
+    {
+        $number = abs((float) $amount);
+        $negative = (float) $amount < 0;
+        $prefix = ($negative ? '-' : '').'₹';
+
+        if ($number >= 10000000) {
+            $value = $number / 10000000;
+
+            return $prefix.rtrim(rtrim(number_format($value, 2, '.', ''), '0'), '.').' Cr';
+        }
+
+        if ($number >= 100000) {
+            $value = $number / 100000;
+
+            return $prefix.rtrim(rtrim(number_format($value, 2, '.', ''), '0'), '.').' L';
+        }
+
+        return format_inr($amount);
+    }
+}

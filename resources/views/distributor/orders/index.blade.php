@@ -45,64 +45,72 @@
         @if($orders->isEmpty())
             <x-admin.empty-state message="No orders yet. Customer orders will appear here after checkout." />
         @else
-            <div class="table-responsive">
-            <table class="data-table">
+            <div class="table-responsive table-responsive-inset table-responsive--orders">
+            <table class="data-table data-table-bordered data-table-orders">
                 <thead>
                     <tr>
                         <th>Order #</th>
                         <th>Customer</th>
-                        <th>Products</th>
-                        <th>Amount</th>
+                        <th>Product</th>
+                        <th>Qty</th>
                         <th>Payment</th>
                         <th>Status</th>
+                        <th>Order Date</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach ($orders as $order)
                         @php
                             $items = $order->inquiry?->items ?? collect();
-                            $productLabel = $items->map(fn ($item) => ($item->product?->name ?? 'Product').' × '.$item->quantity)->join(', ');
+                            $itemCount = $items->count();
                             $currentStatus = $fulfillmentStatuses[$order->fulfillment_status] ?? [
                                 'label' => ucfirst($order->fulfillment_status),
                                 'class' => 'status-btn-pending',
                             ];
                         @endphp
-                        <tr>
-                            <td>{{ $order->order_number }}</td>
-                            <td>{{ $order->customer?->name ?? '—' }}</td>
-                            <td>{{ $productLabel ?: '—' }}</td>
-                            <td>{{ format_inr($order->total_amount) }}</td>
-                            <td><span class="badge badge-gray">{{ ucfirst($order->payment_status) }}</span></td>
-                            <td>
-                                <div class="status-dropdown">
-                                    <button
-                                        type="button"
-                                        class="status-dropdown-trigger status-btn {{ $currentStatus['class'] }} is-active"
-                                        aria-haspopup="listbox"
-                                        aria-expanded="false"
-                                    >
-                                        <span>{{ $currentStatus['label'] }}</span>
-                                        <svg class="icon-svg status-dropdown-chevron" aria-hidden="true"><use href="#icon-chevron-right"></use></svg>
-                                    </button>
-                                    <div class="status-dropdown-menu" role="listbox" hidden>
-                                        @foreach ($fulfillmentStatuses as $value => $status)
-                                            <form method="POST" action="{{ route('distributor.orders.status', $order) }}">
-                                                @csrf
-                                                @method('PATCH')
-                                                <input type="hidden" name="fulfillment_status" value="{{ $value }}">
-                                                <button
-                                                    type="submit"
-                                                    class="status-dropdown-option status-btn {{ $status['class'] }} {{ $order->fulfillment_status === $value ? 'is-selected' : '' }}"
-                                                    {{ $order->fulfillment_status === $value ? 'disabled' : '' }}
-                                                >
-                                                    {{ $status['label'] }}
-                                                </button>
-                                            </form>
-                                        @endforeach
-                                    </div>
-                                </div>
-                            </td>
-                        </tr>
+                        @foreach ($items as $item)
+                            <tr>
+                                @if ($loop->first)
+                                    <td rowspan="{{ $itemCount }}">{{ $order->order_number }}</td>
+                                    <td rowspan="{{ $itemCount }}">{{ $order->customer?->name ?? '—' }}</td>
+                                @endif
+                                <td>{{ $item->product?->name ?? 'Product' }}</td>
+                                <td>{{ $item->quantity }}</td>
+                                @if ($loop->first)
+                                    <td rowspan="{{ $itemCount }}"><span class="badge badge-gray">{{ ucfirst($order->payment_status) }}</span></td>
+                                    <td rowspan="{{ $itemCount }}">
+                                        <div class="status-dropdown">
+                                            <button
+                                                type="button"
+                                                class="status-dropdown-trigger status-btn {{ $currentStatus['class'] }} is-active"
+                                                aria-haspopup="listbox"
+                                                aria-expanded="false"
+                                            >
+                                                <span>{{ $currentStatus['label'] }}</span>
+                                                <svg class="icon-svg status-dropdown-chevron" aria-hidden="true"><use href="#icon-chevron-right"></use></svg>
+                                            </button>
+                                            <div class="status-dropdown-menu" role="listbox" hidden>
+                                                @foreach ($fulfillmentStatuses as $value => $status)
+                                                    <form method="POST" action="{{ route('distributor.orders.status', $order) }}">
+                                                        @csrf
+                                                        @method('PATCH')
+                                                        <input type="hidden" name="fulfillment_status" value="{{ $value }}">
+                                                        <button
+                                                            type="submit"
+                                                            class="status-dropdown-option status-btn {{ $status['class'] }} {{ $order->fulfillment_status === $value ? 'is-selected' : '' }}"
+                                                            {{ $order->fulfillment_status === $value ? 'disabled' : '' }}
+                                                        >
+                                                            {{ $status['label'] }}
+                                                        </button>
+                                                    </form>
+                                                @endforeach
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td rowspan="{{ $itemCount }}">{{ $order->created_at?->format('d M Y') ?? '—' }}</td>
+                                @endif
+                            </tr>
+                        @endforeach
                     @endforeach
                 </tbody>
             </table>

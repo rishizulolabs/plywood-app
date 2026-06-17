@@ -1,8 +1,13 @@
 @extends('layouts.customer')
 
 @section('title', 'Dashboard')
-@section('page-title', 'Dashboard')
-@section('page-subtitle', 'Browse products, manage your cart, and track orders')
+
+@section('page-heading')
+<div class="admin-page-heading">
+    <h1>Dashboard</h1>
+    <p class="admin-page-subtitle">Browse products, manage your cart, and track orders</p>
+</div>
+@endsection
 
 @section('content')
 <div class="customer-dashboard-page">
@@ -19,70 +24,6 @@
             </div>
         </a>
     @endforeach
-</div>
-
-<div class="customer-dashboard-grid">
-    <div class="customer-welcome-card">
-        <div class="customer-welcome-header">
-            <div>
-                <p class="customer-welcome-eyebrow">Customer portal</p>
-                <h2 class="customer-welcome-title">Welcome back, {{ $user->name }}</h2>
-                <p class="customer-welcome-text">
-                    Browse plywood products, add items to your cart, and place orders directly with distributors.
-                </p>
-            </div>
-            <div class="customer-welcome-avatar" aria-hidden="true">
-                {{ strtoupper(substr($user->name, 0, 1)) }}
-            </div>
-        </div>
-
-        <div class="customer-profile-tags">
-            @if($user->company_name)
-                <span class="customer-profile-tag">
-                    <svg class="icon-svg" aria-hidden="true"><use href="#icon-users"></use></svg>
-                    {{ $user->company_name }}
-                </span>
-            @endif
-            @if($user->city)
-                <span class="customer-profile-tag">
-                    <svg class="icon-svg" aria-hidden="true"><use href="#icon-map-pin"></use></svg>
-                    {{ $user->city }}
-                </span>
-            @endif
-            <span class="customer-profile-tag">
-                <svg class="icon-svg" aria-hidden="true"><use href="#icon-user"></use></svg>
-                {{ $user->email }}
-            </span>
-        </div>
-
-        <div class="customer-welcome-actions">
-            <a href="{{ route('customer.catalog.index') }}" class="btn-add">
-                <svg class="btn-icon-svg" aria-hidden="true"><use href="#icon-layers"></use></svg>
-                <span>Browse catalog</span>
-            </a>
-            <a href="{{ route('profile.edit') }}" class="btn-modal">Update profile</a>
-        </div>
-    </div>
-
-    <div class="content-card customer-quick-actions-card">
-        <div class="content-card-header">
-            <p class="content-card-title">Quick actions</p>
-        </div>
-        <div class="customer-quick-actions-grid">
-            @foreach ($quickActions as $action)
-                <a href="{{ $action['href'] }}" class="customer-action-card">
-                    <span class="customer-action-icon customer-action-icon-{{ $action['color'] }}">
-                        <svg class="icon-svg" aria-hidden="true"><use href="#{{ $action['icon'] }}"></use></svg>
-                    </span>
-                    <span class="customer-action-body">
-                        <span class="customer-action-title">{{ $action['title'] }}</span>
-                        <span class="customer-action-desc">{{ $action['desc'] }}</span>
-                    </span>
-                    <svg class="customer-action-chevron icon-svg" aria-hidden="true"><use href="#icon-chevron-right"></use></svg>
-                </a>
-            @endforeach
-        </div>
-    </div>
 </div>
 
 @if($orderCount === 0)
@@ -137,8 +78,7 @@
                     <tr>
                         <th>Order #</th>
                         <th>Distributor</th>
-                        <th>Products</th>
-                        <th>Total</th>
+                        <th>Product</th>
                         <th>Status</th>
                         <th>Date</th>
                     </tr>
@@ -147,13 +87,14 @@
                     @foreach ($recentOrders as $order)
                         @php
                             $items = $order->inquiry?->items ?? collect();
-                            $productLabel = $items->map(fn ($item) => ($item->product?->name ?? 'Product').' × '.$item->quantity)->join(', ');
+                            $productLabel = $items
+                                ->map(fn ($item) => ($item->product?->name ?? 'Product').' * '.$item->quantity)
+                                ->join(', ');
                         @endphp
                         <tr>
                             <td>{{ $order->order_number }}</td>
                             <td>{{ $order->distributorProfile?->business_name ?? '—' }}</td>
                             <td>{{ $productLabel ?: '—' }}</td>
-                            <td>{{ format_inr($order->total_amount) }}</td>
                             <td><span class="badge badge-yellow">{{ ucfirst($order->fulfillment_status) }}</span></td>
                             <td>{{ $order->created_at?->format('d M Y') ?? '—' }}</td>
                         </tr>

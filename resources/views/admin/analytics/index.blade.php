@@ -26,6 +26,19 @@
         'cancelled' => 'status-btn-cancelled',
     ];
 
+    $fulfillmentStatusClasses = [
+        'processing' => 'status-btn-pending',
+        'dispatched' => 'status-btn-dispatched',
+        'delivered' => 'status-btn-approved',
+        'cancelled' => 'status-btn-cancelled',
+    ];
+
+    $paymentStatusClasses = [
+        'pending' => 'status-btn-pending',
+        'partial' => 'status-btn-dispatched',
+        'paid' => 'status-btn-approved',
+    ];
+
     $distributorName = fn ($profile) => $profile?->business_name ?: ($profile?->user?->name ?? '—');
 @endphp
 
@@ -74,7 +87,7 @@
             </span>
             <div>
                 <span class="analytics-summary-label">{{ $isAll ? 'Total purchase value' : 'Purchase value' }}</span>
-                <span class="analytics-summary-value analytics-summary-value-currency">{{ format_inr($summary['restock_orders_total']) }}</span>
+                <span class="analytics-summary-value analytics-summary-value-currency">{{ format_inr_compact($summary['restock_orders_total']) }}</span>
                 <span class="analytics-summary-meta">
                     @if($isAll)
                         {{ $summary['restock_orders_count'] }} purchase order{{ $summary['restock_orders_count'] === 1 ? '' : 's' }} · all distributors
@@ -175,13 +188,14 @@
         @if($recentCustomerOrders->isEmpty())
             <p class="analytics-panel-empty">No customer orders found for {{ $scopeLabel }}.</p>
         @else
-            <div class="table-responsive">
-                <table class="data-table analytics-data-table">
+            <div class="table-responsive table-responsive--orders">
+                <table class="data-table data-table-bordered data-table-orders analytics-data-table">
                     <thead>
                         <tr>
                             <th>Order #</th>
                             <th>Customer</th>
                             <th>Product</th>
+                            <th>Qty</th>
                             @if($isAll)
                                 <th>Distributor</th>
                             @endif
@@ -195,24 +209,35 @@
                         @foreach ($recentCustomerOrders as $customerOrder)
                             @php
                                 $items = $customerOrder->inquiry?->items ?? collect();
-                                $productLabel = $items->map(fn ($item) => ($item->product?->name ?? 'Product').' × '.$item->quantity)->join(', ');
+                                $itemCount = $items->count();
                             @endphp
-                            <tr>
-                                <td class="cell-nowrap">{{ $customerOrder->order_number }}</td>
-                                <td>{{ $customerOrder->customer?->name ?? '—' }}</td>
-                                <td>{{ $productLabel ?: '—' }}</td>
-                                @if($isAll)
-                                    <td>{{ $distributorName($customerOrder->distributorProfile) }}</td>
-                                @endif
-                                <td class="analytics-price">{{ format_inr($customerOrder->total_amount) }}</td>
-                                <td><span class="badge badge-gray">{{ ucfirst($customerOrder->payment_status) }}</span></td>
-                                <td>
-                                    <span class="status-btn {{ $customerOrder->fulfillment_status === 'delivered' ? 'status-btn-approved' : ($customerOrder->fulfillment_status === 'cancelled' ? 'status-btn-cancelled' : 'status-btn-pending') }}">
-                                        {{ ucfirst($customerOrder->fulfillment_status) }}
-                                    </span>
-                                </td>
-                                <td class="cell-nowrap">{{ $customerOrder->created_at?->format('d M Y') ?? '—' }}</td>
-                            </tr>
+                            @foreach ($items as $item)
+                                <tr>
+                                    @if ($loop->first)
+                                        <td class="cell-nowrap" rowspan="{{ $itemCount }}">{{ $customerOrder->order_number }}</td>
+                                        <td rowspan="{{ $itemCount }}">{{ $customerOrder->customer?->name ?? '—' }}</td>
+                                    @endif
+                                    <td class="cell-truncate">{{ $item->product?->name ?? 'Product' }}</td>
+                                    <td class="cell-nowrap">{{ $item->quantity }}</td>
+                                    @if ($loop->first)
+                                        @if($isAll)
+                                            <td rowspan="{{ $itemCount }}">{{ $distributorName($customerOrder->distributorProfile) }}</td>
+                                        @endif
+                                        <td class="analytics-price" rowspan="{{ $itemCount }}">{{ format_inr($customerOrder->total_amount) }}</td>
+                                        <td rowspan="{{ $itemCount }}">
+                                            <span class="status-btn {{ $paymentStatusClasses[$customerOrder->payment_status] ?? 'status-btn-pending' }} is-active">
+                                                {{ ucfirst($customerOrder->payment_status) }}
+                                            </span>
+                                        </td>
+                                        <td rowspan="{{ $itemCount }}">
+                                            <span class="status-btn {{ $fulfillmentStatusClasses[$customerOrder->fulfillment_status] ?? 'status-btn-pending' }} is-active">
+                                                {{ ucfirst($customerOrder->fulfillment_status) }}
+                                            </span>
+                                        </td>
+                                        <td class="cell-nowrap" rowspan="{{ $itemCount }}">{{ $customerOrder->created_at?->format('d M Y') ?? '—' }}</td>
+                                    @endif
+                                </tr>
+                            @endforeach
                         @endforeach
                     </tbody>
                 </table>
@@ -286,7 +311,7 @@
                                 <td>{{ $restockOrder->quantity }}</td>
                                 <td class="analytics-price">{{ format_inr($restockOrder->total_amount) }}</td>
                                 <td>
-                                    <span class="status-btn {{ $restockStatusClasses[$restockOrder->status] ?? 'status-btn-pending' }}">
+                                    <span class="status-btn {{ $restockStatusClasses[$restockOrder->status] ?? 'status-btn-pending' }} is-active">
                                         {{ $restockStatusLabels[$restockOrder->status] ?? ucfirst($restockOrder->status) }}
                                     </span>
                                 </td>
