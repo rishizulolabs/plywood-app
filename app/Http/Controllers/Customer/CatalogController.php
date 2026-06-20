@@ -19,16 +19,8 @@ class CatalogController extends CustomerController
         $categoryId = $request->query('category');
         $distributor = $this->customerDistributor($request);
 
-        $productsQuery = Product::query()
-            ->with(['category', 'media']);
-
-        if ($distributor) {
-            $productsQuery->assignedToDistributor($distributor->id);
-        } else {
-            $productsQuery->whereRaw('1 = 0');
-        }
-
-        $products = $productsQuery
+        $products = Product::query()
+            ->with(['category', 'media'])
             ->when($search !== '', function ($query) use ($search) {
                 $query->where(function ($inner) use ($search) {
                     $inner->where('name', 'like', "%{$search}%")
@@ -43,15 +35,10 @@ class CatalogController extends CustomerController
             ->paginate(12)
             ->withQueryString();
 
-        $categoriesQuery = Category::query()->orderBy('name');
-
-        if ($distributor) {
-            $categoriesQuery->whereHas('products', fn ($query) => $query->assignedToDistributor($distributor->id));
-        } else {
-            $categoriesQuery->whereRaw('1 = 0');
-        }
-
-        $categories = $categoriesQuery->get();
+        $categories = Category::query()
+            ->whereHas('products')
+            ->orderBy('name')
+            ->get();
 
         return view('customer.catalog.index', compact('products', 'categories', 'search', 'categoryId', 'distributor'));
     }
@@ -60,8 +47,6 @@ class CatalogController extends CustomerController
     {
         $distributor = $this->customerDistributor($request);
 
-        abort_unless($distributor && $product->isAssignedToDistributor($distributor->id), 404);
-
         $product->load(['category', 'media', 'distributorProfile']);
 
         return view('customer.catalog.show', compact('product', 'distributor'));
@@ -69,9 +54,8 @@ class CatalogController extends CustomerController
 
     public function addToCart(Request $request, Product $product): RedirectResponse
     {
-        $distributor = $this->customerDistributor($request);
-
-        abort_unless($distributor && $product->isAssignedToDistributor($distributor->id), 404);
+        $distributor = $this->customerDistributor($request)
+            ?? InquiryDistributorResolver::forProduct($product, $request->user());
 
         $validated = $request->validate([
             'quantity' => ['required', 'integer', 'min:1'],

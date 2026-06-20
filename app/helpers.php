@@ -49,3 +49,51 @@ if (! function_exists('format_inr_compact')) {
         return format_inr($amount);
     }
 }
+
+if (! function_exists('normalize_phone')) {
+    function normalize_phone(?string $phone): ?string
+    {
+        if ($phone === null || trim($phone) === '') {
+            return null;
+        }
+
+        $digits = preg_replace('/\D+/', '', $phone) ?? '';
+
+        if ($digits === '') {
+            return null;
+        }
+
+        if (strlen($digits) === 10) {
+            return '+91'.$digits;
+        }
+
+        if (str_starts_with($digits, '91') && strlen($digits) === 12) {
+            return '+'.$digits;
+        }
+
+        return '+'.$digits;
+    }
+}
+
+if (! function_exists('phone_lookup_variants')) {
+    /**
+     * @return list<string>
+     */
+    function phone_lookup_variants(?string $phone): array
+    {
+        $normalized = normalize_phone($phone);
+
+        if ($normalized === null) {
+            return [];
+        }
+
+        $digits = preg_replace('/\D+/', '', $normalized) ?? '';
+        $variants = [$normalized, $digits];
+
+        if (str_starts_with($digits, '91') && strlen($digits) > 2) {
+            $variants[] = substr($digits, 2);
+        }
+
+        return array_values(array_unique(array_filter($variants)));
+    }
+}

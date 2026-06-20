@@ -1,7 +1,12 @@
 @extends('layouts.panel')
 
+@section('brand-name', 'HATTRICK')
 @section('portal-label', 'Admin')
 @section('portal-badge', 'Admin')
+
+@section('sidebar-brand')
+    <x-panel.hattrick-brand />
+@endsection
 
 @if(View::hasSection('page-header-actions'))
     @section('header-actions')
@@ -40,6 +45,9 @@
         </x-panel.nav-link>
         <x-panel.nav-link :href="route('admin.distributor-orders.index')" :active="request()->routeIs('admin.distributor-orders.*')" icon="icon-package">
             Distributor Orders
+        </x-panel.nav-link>
+        <x-panel.nav-link :href="route('admin.warranty-claims.index')" :active="request()->routeIs('admin.warranty-claims.*')" icon="icon-alert-triangle">
+            Warranty Claims
         </x-panel.nav-link>
     </x-panel.nav-section>
 

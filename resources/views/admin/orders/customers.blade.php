@@ -40,6 +40,7 @@
                     <th>Distributor</th>
                     <th>Payment</th>
                     <th>Status</th>
+                    <th>Order Date</th>
                 </tr>
             </thead>
             <tbody>
@@ -68,6 +69,7 @@
                                         <span class="badge badge-yellow">{{ ucfirst($order->fulfillment_status) }}</span>
                                     @endif
                                 </td>
+                                <td class="cell-nowrap" rowspan="{{ $itemCount }}">{{ $order->created_at?->format('d M Y') ?? '—' }}</td>
                             @endif
                         </tr>
                     @endforeach

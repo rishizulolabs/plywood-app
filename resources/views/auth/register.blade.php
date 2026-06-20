@@ -1,4 +1,4 @@
-<x-guest-layout>
+<x-guest-layout :wide="true">
     <div class="auth-page auth-page-register">
         <div class="auth-page-header">
             <h2 class="auth-page-title">Create an account</h2>

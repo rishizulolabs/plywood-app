@@ -29,6 +29,6 @@
         </svg>
     @endif
     @if($showText)
-        <span class="{{ $textClass }}">Plywood</span>
+        <span class="{{ $textClass }}">HATTRICK</span>
     @endif
 </a>

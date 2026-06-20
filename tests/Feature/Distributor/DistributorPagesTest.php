@@ -130,14 +130,14 @@ class DistributorPagesTest extends TestCase
         $this->assertDatabaseHas('distributor_product', [
             'distributor_profile_id' => $profile->id,
             'product_id' => $product->id,
-            'stock_quantity' => 10,
+            'stock_quantity' => 0,
         ]);
 
         $this->actingAs($user)
             ->get(route('distributor.products.index'))
             ->assertOk()
             ->assertSee('Restock Test Ply')
-            ->assertSee('10');
+            ->assertSee('0');
 
         $this->actingAs($user)
             ->get(route('distributor.purchase-orders.index'))
@@ -164,6 +164,33 @@ class DistributorPagesTest extends TestCase
             ->assertSessionHas('success');
 
         $this->assertEquals('approved', $restockRequest->fresh()->status);
+
+        $this->assertDatabaseHas('distributor_product', [
+            'distributor_profile_id' => $profile->id,
+            'product_id' => $product->id,
+            'stock_quantity' => 0,
+        ]);
+
+        $this->actingAs($admin)
+            ->patch(route('admin.distributor-orders.status', $restockRequest), [
+                'status' => 'fulfilled',
+            ])
+            ->assertRedirect(route('admin.distributor-orders.index'))
+            ->assertSessionHas('success');
+
+        $this->assertEquals('fulfilled', $restockRequest->fresh()->status);
+
+        $this->assertDatabaseHas('distributor_product', [
+            'distributor_profile_id' => $profile->id,
+            'product_id' => $product->id,
+            'stock_quantity' => 10,
+        ]);
+
+        $this->actingAs($user)
+            ->get(route('distributor.products.index'))
+            ->assertOk()
+            ->assertSee('Restock Test Ply')
+            ->assertSee('10');
     }
 
     public function test_distributor_products_show_unassigned_catalog_items_with_zero_quantity(): void
@@ -231,7 +258,7 @@ class DistributorPagesTest extends TestCase
             'distributor_profile_id' => $profile->id,
             'product_id' => $product->id,
             'price' => 0,
-            'stock_quantity' => 4,
+            'stock_quantity' => 0,
         ]);
 
         $this->assertDatabaseHas('restock_requests', [

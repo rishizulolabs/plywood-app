@@ -109,7 +109,7 @@ class CustomerPagesTest extends TestCase
             ->assertDontSee('ORD-OTHER-001');
     }
 
-    public function test_customer_catalog_hides_unassigned_products(): void
+    public function test_customer_catalog_shows_unassigned_products(): void
     {
         $user = $this->customerUser();
 
@@ -127,10 +127,10 @@ class CustomerPagesTest extends TestCase
         $this->actingAs($user)
             ->get(route('customer.catalog.index'))
             ->assertOk()
-            ->assertDontSee('Platform Ply 16mm');
+            ->assertSee('Platform Ply 16mm');
     }
 
-    public function test_customer_catalog_only_shows_products_from_assigned_distributor(): void
+    public function test_customer_catalog_shows_products_from_all_distributors(): void
     {
         $user = $this->customerUser();
         $assignedProfile = DistributorProfile::firstOrFail();
@@ -150,7 +150,7 @@ class CustomerPagesTest extends TestCase
 
         $user->update(['distributor_profile_id' => $assignedProfile->id]);
 
-        $visibleProduct = Product::create([
+        $assignedProduct = Product::create([
             'distributor_profile_id' => null,
             'category_id' => Category::first()->id,
             'name' => 'Assigned Distributor Ply',
@@ -161,7 +161,7 @@ class CustomerPagesTest extends TestCase
             'in_stock' => true,
         ]);
 
-        $hiddenProduct = Product::create([
+        $otherProduct = Product::create([
             'distributor_profile_id' => null,
             'category_id' => Category::first()->id,
             'name' => 'Other Distributor Ply',
@@ -172,23 +172,22 @@ class CustomerPagesTest extends TestCase
             'in_stock' => true,
         ]);
 
-        $assignedProfile->offeredProducts()->attach($visibleProduct->id, ['price' => 1500]);
-        $otherProfile->offeredProducts()->attach($hiddenProduct->id, ['price' => 1600]);
+        $assignedProfile->offeredProducts()->attach($assignedProduct->id, ['price' => 1500]);
+        $otherProfile->offeredProducts()->attach($otherProduct->id, ['price' => 1600]);
 
         $this->actingAs($user)
             ->get(route('customer.catalog.index'))
             ->assertOk()
             ->assertSee('Assigned Distributor Ply')
-            ->assertDontSee('Other Distributor Ply');
+            ->assertSee('Other Distributor Ply');
     }
 
-    public function test_customer_catalog_is_empty_without_assigned_distributor(): void
+    public function test_customer_catalog_shows_products_without_assigned_distributor(): void
     {
         $user = $this->customerUser();
-        $profile = DistributorProfile::firstOrFail();
         $user->update(['distributor_profile_id' => null]);
 
-        $product = Product::create([
+        Product::create([
             'distributor_profile_id' => null,
             'category_id' => Category::first()->id,
             'name' => 'Unlinked Customer Ply',
@@ -199,13 +198,11 @@ class CustomerPagesTest extends TestCase
             'in_stock' => true,
         ]);
 
-        $profile->offeredProducts()->attach($product->id, ['price' => 1500]);
-
         $this->actingAs($user)
             ->get(route('customer.catalog.index'))
             ->assertOk()
-            ->assertDontSee('Unlinked Customer Ply')
-            ->assertSee('not linked to a distributor', false);
+            ->assertSee('Unlinked Customer Ply')
+            ->assertSee('Browse all products from the catalog', false);
     }
 
     public function test_customer_can_view_product_detail_page(): void
@@ -225,8 +222,6 @@ class CustomerPagesTest extends TestCase
             'description' => 'Full product description for detail page.',
             'in_stock' => true,
         ]);
-
-        $profile->offeredProducts()->attach($product->id, ['price' => 1100]);
 
         $this->actingAs($user)
             ->get(route('customer.catalog.show', $product))
@@ -259,14 +254,14 @@ class CustomerPagesTest extends TestCase
             'in_stock' => true,
         ]);
 
-        $profile->offeredProducts()->attach($product->id, ['price' => 1800]);
-
         $this->actingAs($user)
             ->get(route('customer.catalog.index'))
             ->assertOk()
             ->assertSee('Admin Listed Ply 18mm')
             ->assertSee('CenturyPly')
             ->assertSee('Add to cart');
+
+        $profile->offeredProducts()->attach($product->id, ['price' => 1800]);
 
         $this->actingAs($user)
             ->post(route('customer.catalog.add-to-cart', $product), ['quantity' => 5])

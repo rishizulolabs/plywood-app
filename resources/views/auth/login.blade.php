@@ -86,38 +86,5 @@
                 <a class="auth-link" href="{{ route('register') }}">Sign up</a>
             </p>
         </div>
-
-        @if (app()->environment('local'))
-            <div
-                class="auth-demo-section"
-                x-data="{
-                    fillDemo(email) {
-                        document.getElementById('email').value = email;
-                        document.getElementById('password').value = 'admin@123';
-                        document.getElementById('email').focus();
-                    }
-                }"
-            >
-                <p class="auth-demo-title">Quick demo login</p>
-                <div class="auth-demo-chips">
-                    <button type="button" class="auth-demo-chip" @click="fillDemo('admin@plywood.com')">
-                        <span class="auth-demo-dot auth-demo-dot-blue"></span>
-                        Admin
-                    </button>
-                    <button type="button" class="auth-demo-chip" @click="fillDemo('customer@plywood.com')">
-                        <span class="auth-demo-dot auth-demo-dot-green"></span>
-                        Customer
-                    </button>
-                    <button type="button" class="auth-demo-chip" @click="fillDemo('distributor@plywood.com')">
-                        <span class="auth-demo-dot auth-demo-dot-amber"></span>
-                        Distributor
-                    </button>
-                </div>
-                <p class="auth-demo-hint">
-                    Password for all demo accounts:
-                    <code class="auth-demo-code">admin@123</code>
-                </p>
-            </div>
-        @endif
     </div>
 </x-guest-layout>

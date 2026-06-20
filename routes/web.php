@@ -10,6 +10,7 @@ use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\Admin\ProductController as AdminProductController;
 use App\Http\Controllers\Admin\SettingsController as AdminSettingsController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
+use App\Http\Controllers\Admin\WarrantyClaimController as AdminWarrantyClaimController;
 use App\Http\Controllers\Customer\CatalogController as CustomerCatalogController;
 use App\Http\Controllers\Customer\DashboardController as CustomerDashboardController;
 use App\Http\Controllers\Customer\CartController as CustomerCartController;
@@ -20,9 +21,14 @@ use App\Http\Controllers\Distributor\ProductController as DistributorProductCont
 use App\Http\Controllers\Distributor\PurchaseOrderController as DistributorPurchaseOrderController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PublicCatalogController;
+use App\Support\DashboardRoute;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
+    if (auth()->check()) {
+        return redirect(DashboardRoute::forUser(auth()->user()));
+    }
+
     return redirect()->route('login');
 })->name('home');
 
@@ -53,6 +59,8 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::post('/customer-orders', [AdminOrderController::class, 'store'])->name('customer-orders.store');
     Route::get('/distributor-orders', [AdminDistributorOrderController::class, 'index'])->name('distributor-orders.index');
     Route::patch('/distributor-orders/{restockRequest}/status', [AdminDistributorOrderController::class, 'updateStatus'])->name('distributor-orders.status');
+    Route::get('/warranty-claims', [AdminWarrantyClaimController::class, 'index'])->name('warranty-claims.index');
+    Route::patch('/warranty-claims/{warrantyClaim}/status', [AdminWarrantyClaimController::class, 'updateStatus'])->name('warranty-claims.status');
     Route::get('/analytics', [AdminAnalyticsController::class, 'index'])->name('analytics.index');
     Route::get('/settings', [AdminSettingsController::class, 'index'])->name('settings.index');
     Route::put('/settings', [AdminSettingsController::class, 'update'])->name('settings.update');

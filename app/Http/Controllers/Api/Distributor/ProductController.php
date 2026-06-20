@@ -1,32 +1,25 @@
 <?php
 
-namespace App\Http\Controllers\Distributor;
+namespace App\Http\Controllers\Api\Distributor;
 
+use App\Http\Controllers\Api\ApiController;
 use App\Models\InquiryItem;
+use App\Models\Order;
 use App\Models\Product;
 use App\Models\RestockRequest;
-use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
-use Illuminate\View\View;
 
-class ProductController extends DistributorController
+class ProductController extends ApiController
 {
-    public function index(Request $request): View
+    public function index(Request $request): JsonResponse
     {
         $search = trim((string) $request->query('search', ''));
-        $profile = $this->distributorProfile();
+        $profile = $request->user()->distributorProfile;
 
         if (! $profile) {
-            $products = new LengthAwarePaginator([], 0, 15);
-
-            return view('distributor.products.index', [
-                'products' => $products,
-                'search' => $search,
-                'assignments' => collect(),
-                'customerOrderTotals' => collect(),
-            ]);
+            return $this->jsonError('Distributor profile not found.', 404);
         }
 
         $products = Product::query()
@@ -41,8 +34,7 @@ class ProductController extends DistributorController
                 });
             })
             ->orderBy('products.name')
-            ->paginate(15)
-            ->withQueryString();
+            ->paginate((int) $request->query('per_page', 20));
 
         $productIds = $products->getCollection()->pluck('id');
 
@@ -65,20 +57,33 @@ class ProductController extends DistributorController
                 ->groupBy('inquiry_items.product_id')
                 ->pluck('total', 'product_id');
 
-        return view('distributor.products.index', [
-            'products' => $products,
-            'search' => $search,
-            'assignments' => $assignments,
-            'customerOrderTotals' => $customerOrderTotals,
+        $items = $products->getCollection()->map(function (Product $product) use ($profile, $assignments, $customerOrderTotals) {
+            $assignment = $assignments->get($product->id);
+            $payload = $this->productPayload($product, $profile->id);
+
+            $payload['is_assigned'] = $assignment !== null;
+            $payload['customer_orders_total'] = (int) ($customerOrderTotals[$product->id] ?? 0);
+
+            return $payload;
+        })->values();
+
+        return $this->jsonSuccess([
+            'products' => $items,
+            'meta' => [
+                'current_page' => $products->currentPage(),
+                'last_page' => $products->lastPage(),
+                'per_page' => $products->perPage(),
+                'total' => $products->total(),
+            ],
         ]);
     }
 
-    public function restock(Request $request, Product $product): RedirectResponse
+    public function restock(Request $request, Product $product): JsonResponse
     {
-        $profile = $this->distributorProfile();
+        $profile = $request->user()->distributorProfile;
 
         if (! $profile) {
-            abort(403);
+            return $this->jsonError('Distributor profile not found.', 404);
         }
 
         $assignedProduct = $profile->offeredProducts()
@@ -112,8 +117,6 @@ class ProductController extends DistributorController
             'status' => 'pending',
         ]);
 
-        return redirect()
-            ->route('distributor.purchase-orders.index', $request->only('search'))
-            ->with('success', "Restock order placed for {$product->name} (×{$quantity}). Admin will review your request.");
+        return $this->jsonSuccess([], "Restock order placed for {$product->name} (×{$quantity}).");
     }
 }

@@ -49,6 +49,29 @@ class CustomerCart
         return CartItem::query()->where('user_id', $user->id)->count();
     }
 
+    public static function total(User $user): float
+    {
+        $total = 0.0;
+
+        foreach (self::items($user) as $item) {
+            $product = Product::query()->find($item['product_id'] ?? null);
+
+            if (! $product) {
+                continue;
+            }
+
+            $distributorId = $item['distributor_profile_id'] ?? null;
+            $offered = $distributorId
+                ? $product->distributors()->where('distributor_profile_id', $distributorId)->first()
+                : null;
+
+            $price = (float) ($offered?->pivot->price ?? 0);
+            $total += $price * (int) ($item['quantity'] ?? 1);
+        }
+
+        return round($total, 2);
+    }
+
     public static function add(User $user, Product $product, int $quantity, ?DistributorProfile $distributor): void
     {
         $existing = CartItem::query()

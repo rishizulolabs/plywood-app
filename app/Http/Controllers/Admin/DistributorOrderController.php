@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\RestockRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 class DistributorOrderController extends Controller
@@ -94,9 +95,18 @@ class DistributorOrderController extends Controller
             'status' => ['required', 'in:pending,approved,fulfilled,cancelled'],
         ]);
 
-        $restockRequest->update([
-            'status' => $validated['status'],
-        ]);
+        $previousStatus = $restockRequest->status;
+        $newStatus = $validated['status'];
+
+        DB::transaction(function () use ($restockRequest, $previousStatus, $newStatus) {
+            $restockRequest->update([
+                'status' => $newStatus,
+            ]);
+
+            if ($previousStatus !== 'fulfilled' && $newStatus === 'fulfilled') {
+                $this->incrementDistributorStock($restockRequest);
+            }
+        });
 
         return redirect()
             ->route('admin.distributor-orders.index', array_filter([
@@ -104,5 +114,31 @@ class DistributorOrderController extends Controller
                 'status' => $request->input('filter_status') ?: $request->query('status'),
             ]))
             ->with('success', 'Restock order status updated.');
+    }
+
+    private function incrementDistributorStock(RestockRequest $restockRequest): void
+    {
+        $assignmentExists = DB::table('distributor_product')
+            ->where('distributor_profile_id', $restockRequest->distributor_profile_id)
+            ->where('product_id', $restockRequest->product_id)
+            ->exists();
+
+        if (! $assignmentExists) {
+            DB::table('distributor_product')->insert([
+                'distributor_profile_id' => $restockRequest->distributor_profile_id,
+                'product_id' => $restockRequest->product_id,
+                'price' => $restockRequest->unit_price,
+                'stock_quantity' => $restockRequest->quantity,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+
+            return;
+        }
+
+        DB::table('distributor_product')
+            ->where('distributor_profile_id', $restockRequest->distributor_profile_id)
+            ->where('product_id', $restockRequest->product_id)
+            ->increment('stock_quantity', $restockRequest->quantity);
     }
 }

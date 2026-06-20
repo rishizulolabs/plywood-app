@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'Dashboard') — {{ config('app.name') }}</title>
+    <title>@yield('title', 'Dashboard') — @yield('brand-name', config('app.name'))</title>
     <link
         rel="stylesheet"
         href="{{ asset('css/admin-theme/admin-dashboard-theme.css') }}"
@@ -23,15 +23,19 @@
 
         <div class="main-with-sidebar" id="main-with-sidebar">
             <aside class="sidebar" id="sidebar">
-                <div class="sidebar-brand">
-                    <div class="sidebar-brand-inner">
-                        <div class="sidebar-logo">{{ strtoupper(substr(config('app.name'), 0, 2)) }}</div>
-                        <div class="sidebar-brand-text">
-                            <p>{{ config('app.name') }}</p>
-                            <p>@yield('portal-label', 'Portal')</p>
+                @hasSection('sidebar-brand')
+                    @yield('sidebar-brand')
+                @else
+                    <div class="sidebar-brand">
+                        <div class="sidebar-brand-inner">
+                            <div class="sidebar-logo">{{ strtoupper(substr(config('app.name'), 0, 2)) }}</div>
+                            <div class="sidebar-brand-text">
+                                <p>{{ config('app.name') }}</p>
+                                <p>@yield('portal-label', 'Portal')</p>
+                            </div>
                         </div>
                     </div>
-                </div>
+                @endif
 
                 <nav class="sidebar-nav">
                     @yield('sidebar-nav')
